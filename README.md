@@ -1,55 +1,18 @@
-# Team-5-Project
+# Team 5 Reservation System
 
-Project for Team 5
+A JavaFX desktop application for managing campus space reservations.
 
+The Sprint 1 scope, sample spaces, reservation rules, and persistence decisions are documented in [Story Scope](Proj%20Instruction%20Files/Story%20Scope.md).
 
+## Requirements
 
-\# Team 5 Reservation System
+- JDK 25
+- Apache Maven 3.9.16
+- Internet connection for Maven dependency downloads
 
+## Run the Tests
 
-
-A JavaFX desktop application for managing reservations.
-
-
-
-\## Requirements
-
-
-
-\- JDK 25
-
-\- Apache Maven 3.9.16
-
-\- Internet connection for Maven to download dependencies
-
-
-
-\## Run the tests
-
-
-
-From the project folder, run:
-
-
+From the project folder:
 
 ```powershell
-
-- `mvn clean test`
-- `mvn javafx:run`
-
-
-
-\## Project structure
-
-
-
-\- `src/main/java/model` - data classes
-
-\- `src/main/java/view` - JavaFX screens
-
-\- `src/main/java/controller` - application logic
-
-\- `src/main/java/persistence` - saving and loading data
-
-\- `src/test/java` - JUnit tests
-
+mvn clean test

@@ -8,7 +8,7 @@ This handoff replaces the original planning snapshot after comparing all local M
 - Project: https://github.com/users/Whytes/projects/2
 - View: **Sprint 1**, **Board** layout
 - Status values: **To Do**, **Doing**, **Done**
-- Task fields: **Order**, **Estimate (hours)** and **Phase**; issue bodies contain prerequisites, requirement references, deliverables, and completion rules.
+- Task fields: **Order**, **Estimate (hours)** and **Phase**; issue bodies contain prerequises, and completion rules.
 - Reviewed final inventory: **37 board items: 35 open / To Do and 2 completed / Done (#31, #32)**.
 - All future work remains unassigned for team selection. Claim an issue before moving it to Doing; distribute meaningful work across the team.
 - Remaining estimates total **79 task-hours**, before newly discovered defects. These are initial planning estimates, not a team-approved sprint capacity or a delivery promise. Re-estimate together; each task should remain between 0.5 and 4 hours.
@@ -19,7 +19,7 @@ This handoff replaces the original planning snapshot after comparing all local M
 2. **The original issues had no estimates or prerequisites.** Every current task now has an estimate, a phase, explicit dependencies, and checkable deliverables. Literal `\n` text in issue descriptions was replaced with real Markdown formatting.
 3. **Some tasks mixed too many responsibilities.** #10 now owns shared storage/read queries; #17/#20/#21 own create/update/cancel rules. Capacity controls (#38), edit UI (#39), and cancellation confirmation (#40) are distinct from business commands. These changes bound tasks rather than merely renaming entire stories.
 4. **Application assembly was missing.** #37 explicitly owns the main window, navigation, shared-state construction, and view attachment/refresh contracts.
-5. **Several assumptions looked like requirements.** Login/accounts, mandatory owner entry, operating-hour restrictions, fixed booking increments, and multi-day support are not required by the supplied stories. #5 records team choices without silently expanding scope. A single local user is a recommendation awaiting team confirmation.
+5. **Several assumptions looked like requirements.** Login/accounts, mandatory owner entry, operating-hour restrictions, fixed booking increments, and multi-day support are not required by the supplied stories. #5 records team choices without silently expanding scope. A single local user is the documented Sprint 1 choice.
 6. **Persistence responsibilities overlapped.** #22 writes, #23 reads, and #24 wires startup/shutdown. Historical reservations may reload even though new/edited reservations in the past must be rejected. Empty saves must stay empty; cancelling the last record must not resurrect sample data.
 7. **Testing was duplicated and too broad.** Implementers own initial focused tests. #25–#28 audit and fill missing coverage instead of recreating the same tests. Controller integration testing is split between #29 and #41. #30 explicitly covers all 27 manual acceptance tests; only the video uses a selected subset.
 8. **Planning and submission tasks lacked a completion point.** #32 is this finite review, not a permanent reminder to use GitHub. #42 prepares the demo script and submission checklist; #33 records/publishes the video; #36 owns setup/usage documentation.
@@ -166,11 +166,12 @@ Every prerequisite comes before its dependent task. This is a convenient start-t
 
 ## Team decisions and outstanding inputs
 
-These remain team decisions, not completed requirements:
+The domain decisions are recorded in [Story Scope](Story%20Scope.md). They define the Sprint 1 implementation scope and do not add requirements beyond the supplied stories.
 
-- Approve the fixed space catalog, local-user interpretation, time representation/precision and equal-start/end policy in #5.
-- Choose Java/JavaFX versions and Maven/Gradle in #4; agree persistence format/path and error handling in #5/#6.
-- Choose a simple schedule presentation that visibly distinguishes occupied and free intervals; actual booking-hour restrictions require explicit justification.
+- Confirm the fixed space catalog, local-user interpretation, time representation/precision, and equal-start/end policy in #5.
+- Choose Java/JavaFX versions and Maven/Gradle in #4.
+- Confirm persistence error handling and the schedule presentation in #5/#6.
+- Actual booking-hour restrictions require explicit justification and remain out of scope.
 - Obtain **Video Demo Requirements**: the local instructions refer to an agenda, but no separate agenda file is present. #42 owns obtaining it and planning the demo.
 - Confirm the time-log code discrepancy: `Team Instructions.md` mentions `O` for meetings; `Development Requirements.md` lists `A/I/V/R/M/P` with `M` for meetings. Use instructor clarification rather than assuming both are consistent.
 - Each member still submits their own time log and retrospective (Word/PDF retrospective on Blazeview). #34 and #35 were previously closed/removed as individual responsibilities; those closures do **not** verify anyone has submitted. #42 preserves the reminder in the team submission checklist.
