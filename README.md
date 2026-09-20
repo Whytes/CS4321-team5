@@ -4,6 +4,8 @@ A JavaFX desktop application for managing campus space reservations.
 
 The Sprint 1 scope, sample spaces, reservation rules, and persistence decisions are documented in [Story Scope](Proj%20Instruction%20Files/Story%20Scope.md).
 
+The MVC package map and component contracts are documented in [MVC Design](Proj%20Instruction%20Files/MVC%20Design.md).
+
 ## Requirements
 
 - JDK 25
