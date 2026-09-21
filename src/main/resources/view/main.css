@@ -1,0 +1,119 @@
+.root {
+    -fx-font-family: "Segoe UI";
+    -fx-background-color: #f4f7f8;
+}
+
+.app-header {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dce5e8;
+    -fx-border-width: 0 0 1 0;
+    -fx-alignment: center-left;
+}
+
+.app-title {
+    -fx-text-fill: #17343d;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.app-subtitle {
+    -fx-text-fill: #6a7c82;
+    -fx-font-size: 12px;
+}
+
+.user-badge {
+    -fx-background-color: #e5f3f1;
+    -fx-background-radius: 14px;
+    -fx-padding: 7px 12px;
+    -fx-text-fill: #176b68;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.sidebar {
+    -fx-background-color: #17343d;
+}
+
+.sidebar-label {
+    -fx-padding: 0 10px 2px 10px;
+    -fx-text-fill: #88b1b1;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.sidebar-separator {
+    -fx-opacity: 0.35;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-alignment: center-left;
+    -fx-padding: 11px 12px;
+    -fx-text-fill: #c4d4d6;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-background-color: #234b54;
+    -fx-text-fill: #ffffff;
+}
+
+.nav-button:selected {
+    -fx-background-color: #2d8581;
+    -fx-text-fill: #ffffff;
+}
+
+.page {
+    -fx-background-color: #f4f7f8;
+}
+
+.page-eyebrow {
+    -fx-text-fill: #2d8581;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.page-title {
+    -fx-text-fill: #17343d;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
+
+.page-message {
+    -fx-max-width: 560px;
+    -fx-text-fill: #64777d;
+    -fx-font-size: 14px;
+}
+
+.metrics {
+    -fx-alignment: bottom-left;
+}
+
+.metric {
+    -fx-min-width: 175px;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 8px;
+    -fx-border-color: #dce5e8;
+    -fx-border-radius: 8px;
+    -fx-padding: 14px 18px;
+}
+
+.metric-value {
+    -fx-text-fill: #17343d;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.status-value {
+    -fx-text-fill: #2d8581;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.metric-label {
+    -fx-text-fill: #74868b;
+    -fx-font-size: 11px;
+}
