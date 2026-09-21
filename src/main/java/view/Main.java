@@ -2,6 +2,7 @@ package view;
 
 import controller.ApplicationController;
 import javafx.application.Application;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -15,12 +16,14 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import model.Space;
 import persistence.InitialSpaceCatalog;
 
 public class Main extends Application {
 
     private final BorderPane content = new BorderPane();
     private ApplicationController applicationController;
+    private SpaceListView spaceListView;
 
     @Override
     public void start(Stage stage) {
@@ -31,7 +34,7 @@ public class Main extends Application {
         root.setLeft(createNavigation());
         root.setCenter(content);
 
-        showPage("Browse spaces", "Select a space to view its details.");
+        showBrowseSpaces();
 
         Scene scene = new Scene(root, 960, 600);
         scene.getStylesheets().add(Main.class.getResource("main.css").toExternalForm());
@@ -96,8 +99,34 @@ public class Main extends Application {
         button.getStyleClass().add("nav-button");
         button.setToggleGroup(pages);
         button.setMaxWidth(Double.MAX_VALUE);
-        button.setOnAction(event -> showPage(title, message));
+        button.setOnAction(event -> {
+            if ("Browse spaces".equals(title)) {
+                showBrowseSpaces();
+            } else {
+                showPage(title, message);
+            }
+        });
         navigation.getChildren().add(button);
+    }
+
+    private void showBrowseSpaces() {
+        Label eyebrow = new Label("RESERVATION WORKSPACE");
+        eyebrow.getStyleClass().add("page-eyebrow");
+
+        Label heading = new Label("Browse spaces");
+        heading.getStyleClass().add("page-title");
+
+        Label message = new Label("Select a space to view its details.");
+        message.getStyleClass().add("page-message");
+        message.setWrapText(true);
+
+        spaceListView = new SpaceListView(
+                applicationController.getSpaceController().getSpaces());
+        VBox page = new VBox(10, eyebrow, heading, message, spaceListView);
+        page.getStyleClass().add("page");
+        page.setPadding(new Insets(32));
+        VBox.setVgrow(spaceListView, Priority.ALWAYS);
+        content.setCenter(page);
     }
 
     private void showPage(String heading, String message) {
@@ -139,6 +168,14 @@ public class Main extends Application {
 
     public ApplicationController getApplicationController() {
         return applicationController;
+    }
+
+    public Space getSelectedSpace() {
+        return spaceListView == null ? null : spaceListView.getSelectedSpace();
+    }
+
+    public ReadOnlyObjectProperty<Space> selectedSpaceProperty() {
+        return spaceListView == null ? null : spaceListView.selectedSpaceProperty();
     }
 
     public static void main(String[] args) {
