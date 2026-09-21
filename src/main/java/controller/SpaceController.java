@@ -28,4 +28,25 @@ public final class SpaceController {
                 .filter(space -> space.getSpaceId().equals(spaceId))
                 .findFirst();
     }
+
+    public List<Space> filterByMinCapacity(Integer minCapacity) {
+        if (minCapacity == null) {
+            return spaces;
+        }
+        return spaces.stream()
+                .filter(space -> space.getCapacity() >= minCapacity)
+                .toList();
+    }
+
+    public List<Space> filterByMinCapacity(String minCapacityStr) {
+        if (minCapacityStr == null || minCapacityStr.trim().isEmpty()) {
+            return spaces;
+        }
+        try {
+            int capacity = Integer.parseInt(minCapacityStr.trim());
+            return filterByMinCapacity(capacity);
+        } catch (NumberFormatException e) {
+            return List.of();
+        }
+    }
 }
