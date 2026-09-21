@@ -121,7 +121,8 @@ public class Main extends Application {
         message.setWrapText(true);
 
         spaceListView = new SpaceListView(
-                applicationController.getSpaceController().getSpaces());
+                applicationController.getSpaceController().getSpaces(),
+                applicationController.getSpaceController());
         VBox page = new VBox(10, eyebrow, heading, message, spaceListView);
         page.getStyleClass().add("page");
         page.setPadding(new Insets(32));

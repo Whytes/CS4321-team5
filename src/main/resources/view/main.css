@@ -167,3 +167,14 @@
     -fx-text-fill: #74868b;
     -fx-font-size: 11px;
 }
+
+.filter-bar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dce5e8;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.button:focused, .text-field:focused {
+    -fx-focus-color: #88b1b1;
+}
