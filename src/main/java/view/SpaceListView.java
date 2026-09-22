@@ -43,7 +43,7 @@ public final class SpaceListView extends BorderPane {
         setPadding(new Insets(18, 0, 0, 0));
         spacesList.getStyleClass().add("space-list");
 
-        Label emptyMessage = new Label("No space match requested minimum capacity.");
+        Label emptyMessage = new Label("No space meets requested minimum capacity.");
         emptyMessage.getStyleClass().add("empty-message");
         spacesList.setPlaceholder(emptyMessage);
 
