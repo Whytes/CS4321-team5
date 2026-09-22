@@ -27,6 +27,9 @@ public final class ReservationStore {
         if (reservation == null) {
             throw new IllegalArgumentException("reservation must not be null");
         }
+        if (hasOverlap(reservation)) {
+            throw new IllegalArgumentException("reservation overlaps an existing booking");
+        }
         reservations.add(reservation);
     }
 
@@ -42,6 +45,7 @@ public final class ReservationStore {
         }
         return false;
     }
+    
     public boolean hasOverlap(Reservation proposed, String excludedReservationId) {
         for (Reservation existing : reservations) {
             if (existing.getReservationId().equals(excludedReservationId)) {

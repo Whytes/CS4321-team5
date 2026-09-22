@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ReservationStoreTest {
@@ -178,5 +179,22 @@ class ReservationStoreTest {
                 10, 0, 11, 0);
 
         assertFalse(store.hasOverlap(edited, "reservation-1"));
+    }
+
+    @Test
+    void rejectsOverlappingReservationWhenAdding() {
+        ReservationStore store = new ReservationStore();
+
+        store.add(reservation(
+                "existing", "study-room-a", date,
+                10, 0, 11, 0));
+
+        Reservation overlapping = reservation(
+                "overlapping", "study-room-a", date,
+                10, 30, 11, 30);
+                
+        assertThrows(
+                IllegalArgumentException.class, 
+                () -> store.add(overlapping));
     }
 }
