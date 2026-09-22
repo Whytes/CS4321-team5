@@ -34,16 +34,7 @@ public final class ReservationStore {
     }
 
     public boolean hasOverlap(Reservation proposed) {
-        for (Reservation existing : reservations) {
-            boolean sameSpace = existing.getSpaceId().equals(proposed.getSpaceId());
-            boolean sameDate = existing.getDate().equals(proposed.getDate());
-            boolean timesOverlap = existing.getStartTime().isBefore(proposed.getEndTime())
-                    && proposed.getStartTime().isBefore(existing.getEndTime());
-            if (sameSpace && sameDate && timesOverlap) {
-                return true;
-            }
-        }
-        return false;
+        return hasOverlap(proposed, null);
     }
     
     public boolean hasOverlap(Reservation proposed, String excludedReservationId) {
