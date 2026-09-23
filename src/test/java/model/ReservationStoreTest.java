@@ -198,45 +198,4 @@ class ReservationStoreTest {
                 IllegalArgumentException.class, 
                 () -> store.add(overlapping));
     }
-    @Test
-    void returnsReservationsForSelectedSpaceAndDateSortedByStartTime() {
-        ReservationStore store = new ReservationStore();
-
-        store.add(reservation(
-                "later", "study-room-a", date,
-                11, 0, 12, 0));
-
-        store.add(reservation(
-                "earlier", "study-room-a", date,
-                9, 0, 10, 0));
-
-        store.add(reservation(
-                "different-space", "study-room-b", date,
-                8, 0, 9, 0));
-
-        store.add(reservation(
-                "different-date", "study-room-a", date.plusDays(1),
-                8, 0, 9, 0));
-
-        var results = store.getReservationsForSpaceAndDate(
-                "study-room-a", date);
-
-        assertEquals(2, results.size());
-        assertEquals("earlier", results.get(0).getReservationId());
-        assertEquals("later", results.get(1).getReservationId());
-    }
-
-    @Test
-    void returnsEmptyListWhenNoReservationsMatchSpaceAndDate() {
-        ReservationStore store = new ReservationStore();
-
-        store.add(reservation(
-                "existing", "study-room-a", date,
-                10, 0, 11, 0));
-
-        var results = store.getReservationsForSpaceAndDate(
-                "study-room-b", date);
-
-        assertTrue(results.isEmpty());
-    }
 }

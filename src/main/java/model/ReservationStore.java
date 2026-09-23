@@ -1,7 +1,6 @@
 package model;
 
 import java.time.LocalDate;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -47,15 +46,6 @@ public final class ReservationStore {
                 .sorted(Comparator.comparing(Reservation::getDate)
                         .thenComparing(Reservation::getStartTime)
                         .thenComparing(Reservation::getReservationId))
-                .toList();
-    }
-
-    public List<Reservation> getReservationsForSpaceAndDate(String spaceId, LocalDate date) {
-        
-        return reservationsById.values().stream()
-                .filter(reservation -> reservation.getSpaceId().equals(spaceId))
-                .filter(reservation -> reservation.getDate().equals(date))
-                .sorted(Comparator.comparing(Reservation::getStartTime))
                 .toList();
     }
 
