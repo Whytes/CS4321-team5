@@ -5,6 +5,7 @@ import java.util.List;
 
 import model.Reservation;
 import model.ReservationStore;
+import service.CancellationService;
 
 /**
  * Coordinates reservation queries against the application's shared store.
@@ -28,6 +29,10 @@ public final class ReservationController {
 
     public List<Reservation> getReservationsForSpace(String spaceId, LocalDate date) {
         return reservationStore.getReservationsForSpace(spaceId, date);
+    }
+
+    public Reservation cancelReservation(String reservationId) {
+        return new CancellationService(reservationStore).cancelReservation(reservationId);
     }
 
     public ReservationStore getReservationStore() {
