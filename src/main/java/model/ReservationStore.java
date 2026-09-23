@@ -45,14 +45,14 @@ public final class ReservationStore {
         return reservationsById.values().stream()
                 .filter(reservation -> reservation.getOwnerId().equals(ownerId))
                 .sorted(Comparator.comparing(Reservation::getDate)
-                        .thenComparing(Reservation::getStartTime))
+                        .thenComparing(Reservation::getStartTime)
                         .thenComparing(Reservation::getReservationId))
                 .toList();
     }
 
     public List<Reservation> getReservationsForSpaceAndDate(String spaceId, LocalDate date) {
         
-        return reservations.stream()
+        return reservationsById.values().stream()
                 .filter(reservation -> reservation.getSpaceId().equals(spaceId))
                 .filter(reservation -> reservation.getDate().equals(date))
                 .sorted(Comparator.comparing(Reservation::getStartTime))
