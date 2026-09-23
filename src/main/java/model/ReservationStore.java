@@ -1,5 +1,6 @@
 package model;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -20,6 +21,15 @@ public final class ReservationStore {
                 .filter(reservation -> reservation.getOwnerId().equals(ownerId))
                 .sorted(Comparator.comparing(Reservation::getDate)
                         .thenComparing(Reservation::getStartTime))
+                .toList();
+    }
+
+    public List<Reservation> getReservationsForSpaceAndDate(String spaceId, LocalDate date) {
+        
+        return reservations.stream()
+                .filter(reservation -> reservation.getSpaceId().equals(spaceId))
+                .filter(reservation -> reservation.getDate().equals(date))
+                .sorted(Comparator.comparing(Reservation::getStartTime))
                 .toList();
     }
 
