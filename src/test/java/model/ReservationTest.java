@@ -1,6 +1,7 @@
 package model;
 
 import org.junit.jupiter.api.Test;
+import java.util.List;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -104,4 +105,33 @@ class ReservationTest {
         assertEquals(first.hashCode(), sameIdentity.hashCode());
         assertEquals(false, first.equals(differentIdentity));
     }
+@Test
+void findsReservationsForSpaceAndDateSortedByStartTime() {
+    ReservationStore store = new ReservationStore();
+
+    Reservation later = new Reservation(
+            "later",
+            "room-a",
+            "owner-a",
+            LocalDate.of(2026, 10, 1),
+            LocalTime.of(13, 0),
+            LocalTime.of(14, 0));
+
+    Reservation earlier = new Reservation(
+            "earlier",
+            "room-a",
+            "owner-a",
+            LocalDate.of(2026, 10, 1),
+            LocalTime.of(9, 0),
+            LocalTime.of(10, 0));
+
+    store.add(later);
+    store.add(earlier);
+
+    assertEquals(
+            List.of(earlier, later),
+            store.getReservationsForSpace(
+                    "room-a",
+                    LocalDate.of(2026, 10, 1)));
+}
 }
