@@ -42,11 +42,7 @@ public final class SpaceController {
         if (minCapacityStr == null || minCapacityStr.trim().isEmpty()) {
             return spaces;
         }
-        try {
-            int capacity = Integer.parseInt(minCapacityStr.trim());
-            return filterByMinCapacity(capacity);
-        } catch (NumberFormatException e) {
-            return List.of();
-        }
+        int capacity = Integer.parseInt(minCapacityStr.trim());
+        return filterByMinCapacity(capacity);
     }
 }

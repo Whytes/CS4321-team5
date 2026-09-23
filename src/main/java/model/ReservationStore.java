@@ -58,6 +58,9 @@ public final class ReservationStore {
             throw new IllegalArgumentException("reservation must not be null");
         }
 
+        if (hasOverlap(reservation)) {
+            throw new IllegalArgumentException("reservation overlaps an existing booking");
+        }
         reservationsById.put(reservation.getReservationId(), reservation);
     }
 
@@ -99,4 +102,24 @@ public final class ReservationStore {
             throw new IllegalArgumentException(fieldName + " must not be blank");
         }
     }
+
+    public boolean hasOverlap(Reservation proposed) {
+        return hasOverlap(proposed, null);
+    }
+    
+    public boolean hasOverlap(Reservation proposed, String excludedReservationId) {
+        for (Reservation existing : reservationsById.values()) {
+            if (existing.getReservationId().equals(excludedReservationId)) {
+                continue; // Skip the reservation with the excluded ID
+            }
+            boolean sameSpace = existing.getSpaceId().equals(proposed.getSpaceId());
+            boolean sameDate = existing.getDate().equals(proposed.getDate());
+            boolean timesOverlap = existing.getStartTime().isBefore(proposed.getEndTime())
+                    && proposed.getStartTime().isBefore(existing.getEndTime());
+            if (sameSpace && sameDate && timesOverlap) {
+                return true;
+            }
+        }
+        return false;
+    }   
 }
