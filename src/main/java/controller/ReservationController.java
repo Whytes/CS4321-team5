@@ -1,5 +1,6 @@
 package controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import model.Reservation;
@@ -24,6 +25,10 @@ public final class ReservationController {
 
     public List<Reservation> getMyReservations() {
         return reservationStore.getReservationsForOwner(LOCAL_USER_ID);
+    }
+
+    public List<Reservation> getReservationsForSpace(String spaceId, LocalDate date) {
+        return reservationStore.getReservationsForSpace(spaceId, date);
     }
 
     public Reservation cancelReservation(String reservationId) {
