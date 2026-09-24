@@ -32,7 +32,19 @@ public final class ReservationController {
     }
 
     public Reservation cancelReservation(String reservationId) {
-        return new CancellationService(reservationStore).cancelReservation(reservationId);
+        Reservation reservation = reservationStore.getReservation(reservationId);
+
+        if (reservation == null) {
+            return null;
+        }
+
+        if (!LOCAL_USER_ID.equals(reservation.getOwnerId())) {
+            throw new IllegalArgumentException(
+                    "reservation does not belong to local-user");
+        }
+
+        return new CancellationService(reservationStore)
+                .cancelReservation(reservationId);
     }
 
     public ReservationStore getReservationStore() {
