@@ -7,11 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import model.Reservation;
 import model.ReservationStore;
+import model.AvailabilitySlot;
 
 class ReservationControllerTest {
 
@@ -66,6 +68,35 @@ class ReservationControllerTest {
         assertThrows(IllegalArgumentException.class,
                 () -> controller.getReservationsForSpace(
                         "study-room-a", null));
+    }
+
+    @Test
+    void dailyScheduleIncludesLeadingBetweenAndTrailingAvailability() {
+        ReservationStore store = new ReservationStore();
+        LocalDate date = LocalDate.of(2026, 10, 1);
+        store.add(new Reservation("first", "room-a", "owner", date,
+                LocalTime.of(9, 0), LocalTime.of(10, 0)));
+        store.add(new Reservation("second", "room-a", "owner", date,
+                LocalTime.of(13, 0), LocalTime.of(14, 0)));
+
+        var schedule = new ReservationController(store).getDailySchedule("room-a", date);
+
+        assertEquals(5, schedule.size());
+        assertEquals(LocalTime.MIN, schedule.get(0).startTime());
+        assertEquals(LocalTime.of(9, 0), schedule.get(0).endTime());
+        assertEquals("first", schedule.get(1).reservationId());
+        assertEquals(LocalTime.of(10, 0), schedule.get(2).startTime());
+        assertEquals("second", schedule.get(3).reservationId());
+        assertEquals(LocalTime.MAX, schedule.get(4).endTime());
+    }
+
+    @Test
+    void dayWithNoReservationsIsFullyAvailable() {
+        var schedule = new ReservationController(new ReservationStore())
+                .getDailySchedule("room-a", LocalDate.of(2026, 10, 1));
+
+        assertEquals(List.of(AvailabilitySlot.available(LocalTime.MIN, LocalTime.MAX)),
+                schedule);
     }
 
     @Test

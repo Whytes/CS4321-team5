@@ -24,6 +24,7 @@ public class Main extends Application {
     private final BorderPane content = new BorderPane();
     private ApplicationController applicationController;
     private SpaceListView spaceListView;
+    private AvailabilityView availabilityView;
 
     @Override
     public void start(Stage stage) {
@@ -102,11 +103,33 @@ public class Main extends Application {
         button.setOnAction(event -> {
             if ("Browse spaces".equals(title)) {
                 showBrowseSpaces();
+            } else if ("Daily availability".equals(title)) {
+                showAvailability();
             } else {
                 showPage(title, message);
             }
         });
         navigation.getChildren().add(button);
+    }
+
+    private void showAvailability() {
+        Label eyebrow = new Label("RESERVATION WORKSPACE");
+        eyebrow.getStyleClass().add("page-eyebrow");
+        Label heading = new Label("Daily availability");
+        heading.getStyleClass().add("page-title");
+        Label message = new Label(
+                "Reserved and available intervals are shown for the complete selected day.");
+        message.getStyleClass().add("page-message");
+        message.setWrapText(true);
+
+        availabilityView = new AvailabilityView(
+                applicationController.getSpaceController().getSpaces(),
+                applicationController.getReservationController());
+        VBox page = new VBox(10, eyebrow, heading, message, availabilityView);
+        page.getStyleClass().add("page");
+        page.setPadding(new Insets(32));
+        VBox.setVgrow(availabilityView, Priority.ALWAYS);
+        content.setCenter(page);
     }
 
     private void showBrowseSpaces() {
