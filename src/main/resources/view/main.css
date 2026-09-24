@@ -175,6 +175,61 @@
     -fx-background-radius: 8px;
 }
 
+.availability-controls {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dce5e8;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 14px;
+}
+
+.availability-label {
+    -fx-text-fill: #64777d;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.availability-list {
+    -fx-background-color: transparent;
+    -fx-border-color: #dce5e8;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.availability-list .list-cell {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent transparent #edf1f2 transparent;
+    -fx-padding: 10px 14px;
+}
+
+.availability-cell {
+    -fx-padding: 2px 8px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.availability-cell .label:first-child {
+    -fx-font-weight: bold;
+}
+
+.reserved-slot {
+    -fx-background-color: #f8dfdf;
+    -fx-border-color: #d88f8f;
+}
+
+.reserved-slot .label {
+    -fx-text-fill: #8a3030;
+}
+
+.available-slot {
+    -fx-background-color: #e5f3f1;
+    -fx-border-color: #9acbc5;
+}
+
+.available-slot .label {
+    -fx-text-fill: #176b68;
+}
+
 .button:focused, .text-field:focused {
     -fx-focus-color: #88b1b1;
 }

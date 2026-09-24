@@ -1,8 +1,10 @@
 package controller;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
+import model.AvailabilitySlot;
 import model.Reservation;
 import model.ReservationStore;
 import service.CancellationService;
@@ -45,6 +47,30 @@ public final class ReservationController {
 
         return new CancellationService(reservationStore)
                 .cancelReservation(reservationId);
+    }
+
+    /**
+     * Returns the complete calendar day, including free intervals before, between,
+     * and after reservations. No operating-hour restriction is imposed.
+     */
+    public List<AvailabilitySlot> getDailySchedule(String spaceId, LocalDate date) {
+        List<Reservation> reservations = getReservationsForSpace(spaceId, date);
+        List<AvailabilitySlot> schedule = new java.util.ArrayList<>();
+        LocalTime cursor = LocalTime.MIN;
+
+        for (Reservation reservation : reservations) {
+            if (cursor.isBefore(reservation.getStartTime())) {
+                schedule.add(AvailabilitySlot.available(cursor, reservation.getStartTime()));
+            }
+            schedule.add(AvailabilitySlot.reserved(reservation));
+            cursor = cursor.isAfter(reservation.getEndTime())
+                    ? cursor : reservation.getEndTime();
+        }
+
+        if (cursor.isBefore(LocalTime.MAX)) {
+            schedule.add(AvailabilitySlot.available(cursor, LocalTime.MAX));
+        }
+        return List.copyOf(schedule);
     }
 
     public ReservationStore getReservationStore() {
