@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.util.Locale;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -26,15 +27,15 @@ import model.Space;
 public final class AvailabilityView extends VBox {
 
     private static final DateTimeFormatter TIME_FORMAT =
-            DateTimeFormatter.ofPattern("h:mm a");
+            DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
     private static final DateTimeFormatter TIME_WITH_SECONDS_FORMAT =
-            DateTimeFormatter.ofPattern("h:mm:ss a");
+            DateTimeFormatter.ofPattern("h:mm:ss a", Locale.ENGLISH);
     private static final DateTimeFormatter TIME_WITH_FRACTION_FORMAT =
             new DateTimeFormatterBuilder()
                     .appendPattern("h:mm:ss")
                     .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
                     .appendPattern(" a")
-                    .toFormatter();
+                    .toFormatter(Locale.ENGLISH);
 
     private final ComboBox<Space> spaceSelector = new ComboBox<>();
     private final DatePicker datePicker = new DatePicker(LocalDate.now());

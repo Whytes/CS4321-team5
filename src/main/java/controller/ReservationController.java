@@ -50,8 +50,10 @@ public final class ReservationController {
             if (cursor.isBefore(reservation.getStartTime())) {
                 schedule.add(AvailabilitySlot.available(cursor, reservation.getStartTime()));
             }
+            schedule.add(AvailabilitySlot.reserved(reservation));
             cursor = cursor.isAfter(reservation.getEndTime())
                     ? cursor : reservation.getEndTime();
+        }
 
         if (cursor.isBefore(LocalTime.MAX)) {
             schedule.add(AvailabilitySlot.available(cursor, LocalTime.MAX));

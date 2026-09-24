@@ -100,6 +100,28 @@ class ReservationControllerTest {
     }
 
     @Test
+    void dailyScheduleDoesNotCreateAvailabilityInsideOverlappingSnapshotReservations() {
+        ReservationStore store = new ReservationStore();
+        LocalDate date = LocalDate.of(2026, 10, 1);
+        Reservation first = new Reservation("first", "room-a", "owner", date,
+                LocalTime.of(9, 0), LocalTime.of(12, 0));
+        Reservation overlapping = new Reservation("overlapping", "room-a", "owner", date,
+                LocalTime.of(10, 0), LocalTime.of(14, 0));
+        store.loadSnapshot(List.of(first, overlapping));
+
+        var schedule = new ReservationController(store).getDailySchedule("room-a", date);
+
+        assertEquals(4, schedule.size());
+        assertEquals(LocalTime.MIN, schedule.get(0).startTime());
+        assertEquals(LocalTime.of(9, 0), schedule.get(0).endTime());
+        assertEquals("first", schedule.get(1).reservationId());
+        assertEquals("overlapping", schedule.get(2).reservationId());
+        assertEquals(LocalTime.of(14, 0), schedule.get(2).endTime());
+        assertEquals(LocalTime.of(14, 0), schedule.get(3).startTime());
+        assertEquals(LocalTime.MAX, schedule.get(3).endTime());
+    }
+
+    @Test
     void cancelReservation_removesReservationFromSharedStore() {
         ReservationStore store = new ReservationStore();
         ReservationController controller = new ReservationController(store);
