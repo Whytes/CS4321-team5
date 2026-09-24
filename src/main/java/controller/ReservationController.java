@@ -1,5 +1,6 @@
 package controller;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -7,7 +8,11 @@ import java.util.List;
 import model.AvailabilitySlot;
 import model.Reservation;
 import model.ReservationStore;
+import model.Space;
+import persistence.InitialSpaceCatalog;
 import service.CancellationService;
+import service.ReservationCreationResult;
+import service.ReservationCreationService;
 
 /**
  * Coordinates reservation queries against the application's shared store.
@@ -17,12 +22,23 @@ public final class ReservationController {
     public static final String LOCAL_USER_ID = "local-user";
 
     private final ReservationStore reservationStore;
+    private final ReservationCreationService reservationCreationService;
 
     public ReservationController(ReservationStore reservationStore) {
+        this(reservationStore, InitialSpaceCatalog.getDefaultSpaces(),
+                Clock.systemDefaultZone());
+    }
+
+    public ReservationController(
+            ReservationStore reservationStore,
+            List<Space> spaces,
+            Clock clock) {
         if (reservationStore == null) {
             throw new IllegalArgumentException("reservationStore must not be null");
         }
         this.reservationStore = reservationStore;
+        this.reservationCreationService = new ReservationCreationService(
+                reservationStore, spaces, clock);
     }
 
     public List<Reservation> getMyReservations() {
@@ -31,6 +47,15 @@ public final class ReservationController {
 
     public List<Reservation> getReservationsForSpace(String spaceId, LocalDate date) {
         return reservationStore.getReservationsForSpace(spaceId, date);
+    }
+
+    public ReservationCreationResult createReservation(
+            String spaceId,
+            LocalDate date,
+            LocalTime startTime,
+            LocalTime endTime) {
+        return reservationCreationService.createReservation(
+                spaceId, date, startTime, endTime);
     }
 
     public Reservation cancelReservation(String reservationId) {

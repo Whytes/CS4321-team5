@@ -1,5 +1,6 @@
 package controller;
 
+import java.time.Clock;
 import java.util.List;
 
 import model.ReservationStore;
@@ -17,7 +18,8 @@ public final class ApplicationController {
     public ApplicationController(List<Space> spaces) {
         reservationStore = new ReservationStore();
         spaceController = new SpaceController(spaces);
-        reservationController = new ReservationController(reservationStore);
+        reservationController = new ReservationController(
+            reservationStore, spaces, Clock.systemDefaultZone());
     }
 
     public ReservationStore getReservationStore() {
