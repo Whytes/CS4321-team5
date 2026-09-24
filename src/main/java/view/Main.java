@@ -25,6 +25,7 @@ public class Main extends Application {
     private ApplicationController applicationController;
     private SpaceListView spaceListView;
     private AvailabilityView availabilityView;
+    private MyReservationsView myReservationsView;
 
     @Override
     public void start(Stage stage) {
@@ -105,6 +106,8 @@ public class Main extends Application {
                 showBrowseSpaces();
             } else if ("Daily availability".equals(title)) {
                 showAvailability();
+            } else if ("My reservations".equals(title)) {
+                showMyReservations();
             } else {
                 showPage(title, message);
             }
@@ -129,6 +132,29 @@ public class Main extends Application {
         page.getStyleClass().add("page");
         page.setPadding(new Insets(32));
         VBox.setVgrow(availabilityView, Priority.ALWAYS);
+        content.setCenter(page);
+    }
+
+    private void showMyReservations() {
+        Label eyebrow = new Label("RESERVATION WORKSPACE");
+        eyebrow.getStyleClass().add("page-eyebrow");
+
+        Label heading = new Label("My reservations");
+        heading.getStyleClass().add("page-title");
+
+        Label message = new Label("View your current reservations.");
+        message.getStyleClass().add("page-message");
+        message.setWrapText(true);
+
+        myReservationsView = new MyReservationsView(
+                applicationController.getSpaceController().getSpaces(),
+                applicationController.getReservationController());
+
+        VBox page = new VBox(10, eyebrow, heading, message, myReservationsView);
+        page.getStyleClass().add("page");
+        page.setPadding(new Insets(32));
+        VBox.setVgrow(myReservationsView, Priority.ALWAYS);
+
         content.setCenter(page);
     }
 
