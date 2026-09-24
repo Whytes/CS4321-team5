@@ -16,6 +16,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import model.Reservation;
 import model.Space;
 import persistence.InitialSpaceCatalog;
 
@@ -25,6 +26,9 @@ public class Main extends Application {
     private ApplicationController applicationController;
     private SpaceListView spaceListView;
     private AvailabilityView availabilityView;
+    private MyReservationsView myReservationsView;
+    private ToggleButton browseSpacesButton;
+    private ToggleButton availabilityButton;
 
     @Override
     public void start(Stage stage) {
@@ -90,6 +94,7 @@ public class Main extends Application {
                 "Your reservations will appear here.");
 
         ToggleButton first = (ToggleButton) navigation.getChildren().get(2);
+        browseSpacesButton = first;
         first.fire();
         return navigation;
     }
@@ -100,11 +105,23 @@ public class Main extends Application {
         button.getStyleClass().add("nav-button");
         button.setToggleGroup(pages);
         button.setMaxWidth(Double.MAX_VALUE);
+        if ("Daily availability".equals(title)) {
+            availabilityButton = button;
+        }
         button.setOnAction(event -> {
+            if (!button.isSelected()) {
+                // Clicking the active page should not deselect it or discard its inputs.
+                button.setSelected(true);
+                return;
+            }
             if ("Browse spaces".equals(title)) {
                 showBrowseSpaces();
             } else if ("Daily availability".equals(title)) {
                 showAvailability();
+            } else if ("New reservation".equals(title)) {
+                showNewReservation();
+            } else if ("My reservations".equals(title)) {
+                showMyReservations();
             } else {
                 showPage(title, message);
             }
@@ -113,23 +130,87 @@ public class Main extends Application {
     }
 
     private void showAvailability() {
+        showAvailability("Reserved and available intervals are shown for the complete selected day.");
+    }
+
+    private void showAvailability(String messageText) {
         Label eyebrow = new Label("RESERVATION WORKSPACE");
         eyebrow.getStyleClass().add("page-eyebrow");
         Label heading = new Label("Daily availability");
         heading.getStyleClass().add("page-title");
-        Label message = new Label(
-                "Reserved and available intervals are shown for the complete selected day.");
+        Label message = new Label(messageText);
+        message.setId("availability-message");
         message.getStyleClass().add("page-message");
         message.setWrapText(true);
 
-        availabilityView = new AvailabilityView(
-                applicationController.getSpaceController().getSpaces(),
-                applicationController.getReservationController());
+        if (availabilityView == null) {
+            availabilityView = new AvailabilityView(
+                    applicationController.getSpaceController().getSpaces(),
+                    applicationController.getReservationController());
+        }
         VBox page = new VBox(10, eyebrow, heading, message, availabilityView);
         page.getStyleClass().add("page");
         page.setPadding(new Insets(32));
         VBox.setVgrow(availabilityView, Priority.ALWAYS);
         content.setCenter(page);
+    }
+
+    private void showNewReservation() {
+        Label eyebrow = new Label("RESERVATION WORKSPACE");
+        eyebrow.getStyleClass().add("page-eyebrow");
+        Label heading = new Label("New reservation");
+        heading.getStyleClass().add("page-title");
+        Label message = new Label("Choose a space and time for your reservation.");
+        message.getStyleClass().add("page-message");
+        message.setWrapText(true);
+
+        ReservationFormView form = new ReservationFormView(
+                applicationController.getSpaceController().getSpaces(),
+                applicationController.getReservationController(),
+                this::handleReservationCreated,
+                () -> {
+                    browseSpacesButton.setSelected(true);
+                    showBrowseSpaces();
+                });
+        VBox page = new VBox(10, eyebrow, heading, message, form);
+        page.getStyleClass().add("page");
+        page.setPadding(new Insets(32));
+        content.setCenter(page);
+    }
+
+    private void handleReservationCreated(Reservation reservation) {
+        refreshReservationViews();
+        showAvailability("Reservation created");
+        availabilityButton.setSelected(true);
+        availabilityView.showReservation(reservation);
+    }
+
+    private void showMyReservations() {
+        Label eyebrow = new Label("RESERVATION WORKSPACE");
+        eyebrow.getStyleClass().add("page-eyebrow");
+        Label heading = new Label("My reservations");
+        heading.getStyleClass().add("page-title");
+        Label message = new Label("Reservations created during this application session.");
+        message.getStyleClass().add("page-message");
+        message.setWrapText(true);
+
+        myReservationsView = new MyReservationsView(
+                applicationController.getReservationController(),
+                applicationController.getSpaceController());
+        VBox page = new VBox(10, eyebrow, heading, message, myReservationsView);
+        page.getStyleClass().add("page");
+        page.setPadding(new Insets(32));
+        VBox.setVgrow(myReservationsView, Priority.ALWAYS);
+        content.setCenter(page);
+    }
+
+    private void refreshReservationViews() {
+        if (availabilityView != null) {
+            availabilityView.refreshAfterReservationChange();
+        }
+        if (myReservationsView != null) {
+            myReservationsView.refreshAfterReservationChange();
+        }
     }
 
     private void showBrowseSpaces() {
