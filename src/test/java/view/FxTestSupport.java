@@ -16,6 +16,7 @@ final class FxTestSupport {
             return;
         }
         CountDownLatch ready = new CountDownLatch(1);
+        Platform.startup(() -> {
             Platform.setImplicitExit(false);
             ready.countDown();
         });
