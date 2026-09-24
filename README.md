@@ -18,3 +18,4 @@ From the project folder:
 
 ```powershell
 mvn clean test
+```

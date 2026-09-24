@@ -5,15 +5,20 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.time.ZoneOffset;
 
 import org.junit.jupiter.api.Test;
 
 import model.Reservation;
 import model.ReservationStore;
 import model.AvailabilitySlot;
+import persistence.InitialSpaceCatalog;
+import service.ReservationCreationResult;
 
 class ReservationControllerTest {
 
@@ -163,4 +168,35 @@ class ReservationControllerTest {
 
         assertEquals(reservation, store.getReservation("res-1"));
     }
+
+        @Test
+        void createReservationCommandAddsReservationToSharedStore() {
+                ReservationStore store = new ReservationStore();
+                ReservationController controller = new ReservationController(
+                                store,
+                                InitialSpaceCatalog.getDefaultSpaces(),
+                                Clock.fixed(Instant.parse("2026-09-30T12:00:00Z"), ZoneOffset.UTC));
+
+                ReservationCreationResult result = controller.createReservation(
+                                "study-room-a", LocalDate.of(2026, 10, 1),
+                                LocalTime.of(9, 0), LocalTime.of(10, 0));
+
+                assertTrue(result.isSuccess());
+                assertEquals(result.getReservation(),
+                                store.getReservation(result.getReservation().getReservationId()));
+                assertEquals(1, store.getReservations().size());
+        }
+
+        @Test
+        void legacyConstructorCanCreateFromDefaultCatalog() {
+                ReservationStore store = new ReservationStore();
+                ReservationController controller = new ReservationController(store);
+
+                ReservationCreationResult result = controller.createReservation(
+                                "study-room-a", LocalDate.now().plusDays(1),
+                                LocalTime.NOON, LocalTime.of(13, 0));
+
+                assertTrue(result.isSuccess());
+                assertEquals(1, store.getReservations().size());
+        }
 }
