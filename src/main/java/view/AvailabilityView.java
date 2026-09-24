@@ -4,6 +4,8 @@ import controller.ReservationController;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -25,6 +27,14 @@ public final class AvailabilityView extends VBox {
 
     private static final DateTimeFormatter TIME_FORMAT =
             DateTimeFormatter.ofPattern("h:mm a");
+    private static final DateTimeFormatter TIME_WITH_SECONDS_FORMAT =
+            DateTimeFormatter.ofPattern("h:mm:ss a");
+    private static final DateTimeFormatter TIME_WITH_FRACTION_FORMAT =
+            new DateTimeFormatterBuilder()
+                    .appendPattern("h:mm:ss")
+                    .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
+                    .appendPattern(" a")
+                    .toFormatter();
 
     private final ComboBox<Space> spaceSelector = new ComboBox<>();
     private final DatePicker datePicker = new DatePicker(LocalDate.now());
@@ -121,18 +131,27 @@ public final class AvailabilityView extends VBox {
                 return;
             }
             status.setText(slot.getStatusLabel());
-            interval.setText(formatTime(slot.startTime()) + " - " + formatEndTime(slot.endTime()));
+            interval.setText(formatTime(slot.startTime()) + " - " + formatTime(slot.endTime()));
             content.getStyleClass().removeAll("reserved-slot", "available-slot");
             content.getStyleClass().add(slot.reserved() ? "reserved-slot" : "available-slot");
             setGraphic(content);
         }
 
-        private static String formatTime(LocalTime time) {
-            return time.equals(LocalTime.MAX) ? "11:59 PM" : TIME_FORMAT.format(time);
-        }
+    }
 
-        private static String formatEndTime(LocalTime time) {
-            return formatTime(time);
+    static String formatTime(LocalTime time) {
+        if (time.equals(LocalTime.MIN)) {
+            return "Start of day";
         }
+        if (time.equals(LocalTime.MAX)) {
+            return "End of day";
+        }
+        if (time.getNano() != 0) {
+            return TIME_WITH_FRACTION_FORMAT.format(time);
+        }
+        if (time.getSecond() != 0) {
+            return TIME_WITH_SECONDS_FORMAT.format(time);
+        }
+        return TIME_FORMAT.format(time);
     }
 }
