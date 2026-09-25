@@ -54,4 +54,12 @@ class SpaceControllerTest {
             controller.filterByMinCapacity("abc");
         });
     }
+
+    @Test
+    void testEmptyCatalogReturnsNoSpaces() {
+        SpaceController emptyController = new SpaceController(List.of());
+
+        assertTrue(emptyController.getSpaces().isEmpty());
+        assertTrue(emptyController.filterByMinCapacity(10).isEmpty());
+    }
 }

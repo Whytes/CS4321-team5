@@ -233,3 +233,29 @@
 .button:focused, .text-field:focused {
     -fx-focus-color: #88b1b1;
 }
+
+.reservation-form,
+.my-reservations-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dce5e8;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 18px;
+}
+
+.reservation-form .text-field,
+.reservation-form .combo-box,
+.reservation-form .date-picker {
+    -fx-pref-height: 34px;
+}
+
+.validation-feedback {
+    -fx-text-fill: #8a3030;
+    -fx-font-size: 13px;
+}
+
+.success-feedback {
+    -fx-text-fill: #176b68;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
