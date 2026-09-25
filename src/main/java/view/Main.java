@@ -196,7 +196,8 @@ public class Main extends Application {
 
         myReservationsView = new MyReservationsView(
                 applicationController.getReservationController(),
-                applicationController.getSpaceController());
+                applicationController.getSpaceController(),
+                this::handleReservationCancellation);
         VBox page = new VBox(10, eyebrow, heading, message, myReservationsView);
         page.getStyleClass().add("page");
         page.setPadding(new Insets(32));
@@ -210,6 +211,14 @@ public class Main extends Application {
         }
         if (myReservationsView != null) {
             myReservationsView.refreshAfterReservationChange();
+        }
+    }
+
+    void handleReservationCancellation(Reservation reservation) {
+        Reservation cancelled = applicationController.getReservationController()
+                .cancelReservation(reservation.getReservationId());
+        if (cancelled != null) {
+            refreshReservationViews();
         }
     }
 

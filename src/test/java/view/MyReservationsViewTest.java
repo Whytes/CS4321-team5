@@ -77,6 +77,20 @@ class MyReservationsViewTest {
         });
     }
 
+    @Test
+    void cancelActionIsDisabledUntilAReservationIsSelected() throws Exception {
+        onFx(() -> {
+            Fixture fixture = new Fixture();
+            assertTrue(fixture.view.getCancelButton().isDisabled());
+
+            fixture.store.add(reservation("booking", "study-room-a", "local-user", 10));
+            fixture.refresh();
+            fixture.list.getSelectionModel().selectFirst();
+
+            assertFalse(fixture.view.getCancelButton().isDisabled());
+        });
+    }
+
     private static Reservation reservation(String id, String space, String owner, int hour) {
         return new Reservation(id, space, owner, LocalDate.of(2026, 10, 1),
                 LocalTime.of(hour, 0), LocalTime.of(hour + 1, 0));
