@@ -46,6 +46,35 @@ class ReservationShellIntegrationTest {
         });
     }
 
+    @Test
+    void confirmedCancellationRefreshesPersonalListAndAvailability() throws Exception {
+        onFx(() -> {
+            try (Shell shell = new Shell()) {
+                Reservation reservation = new Reservation(
+                        "booking", "study-room-a", "local-user", shell.day,
+                        java.time.LocalTime.of(10, 0), java.time.LocalTime.of(11, 0));
+                shell.application.getApplicationController().getReservationStore().add(reservation);
+
+                shell.navigate("My reservations");
+                ListView<?> personalList = (ListView<?>) shell.stage.getScene()
+                        .lookup("#my-reservations-list");
+                personalList.getSelectionModel().selectFirst();
+                shell.application.handleReservationCancellation(reservation);
+
+                assertTrue(personalList.getItems().isEmpty());
+                shell.navigate("Daily availability");
+                AvailabilityView availability = (AvailabilityView) shell.stage.getScene()
+                        .lookup(".availability-view");
+                availability.selectedSpaceProperty().set(shell.application
+                        .getApplicationController().getSpaceController()
+                        .findById("study-room-a").orElseThrow());
+                availability.getDatePicker().setValue(shell.day);
+                assertEquals(1, shell.schedule().getItems().size());
+                assertFalse(shell.schedule().getItems().get(0).reserved());
+            }
+        });
+    }
+
     // US-6 AT2: create the original through the shell, then reject overlapping input.
     @Test
     void rejectsConflictingBookingThroughShell() throws Exception {
