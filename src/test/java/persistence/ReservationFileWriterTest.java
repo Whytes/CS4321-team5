@@ -68,7 +68,8 @@ class ReservationFileWriterTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new ReservationFileWriter(file).write(List.of((Reservation) null)));
+                () -> new ReservationFileWriter(file)
+                        .write(java.util.Collections.singletonList((Reservation) null)));
     }
 
     private static Reservation reservation(String reservationId) {
