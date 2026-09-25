@@ -199,4 +199,29 @@ class ReservationControllerTest {
                 assertTrue(result.isSuccess());
                 assertEquals(1, store.getReservations().size());
         }
+
+        @Test
+        void getMyReservationsReturnsOnlyLocalUserReservationsInDateAndTimeOrder() {
+                ReservationStore store = new ReservationStore();
+                ReservationController controller = new ReservationController(store);
+
+                LocalDate firstDate = LocalDate.of(2026, 10, 1);
+                LocalDate secondDate = LocalDate.of(2026, 10, 2);
+
+                store.add(new Reservation("later-date", "study-room-a", "local-user",
+                        secondDate, LocalTime.of(9, 0), LocalTime.of(10, 0)));
+                store.add(new Reservation("later-time", "study-room-b", "local-user",
+                        firstDate, LocalTime.of(13, 0), LocalTime.of(14, 0)));
+                store.add(new Reservation("earlier-time", "study-room-a", "local-user",
+                        firstDate, LocalTime.of(9, 0), LocalTime.of(10, 0)));
+                store.add(new Reservation("other-user", "study-room-c", "other-user",
+                        firstDate, LocalTime.of(8, 0), LocalTime.of(9, 0)));
+
+                List<Reservation> results = controller.getMyReservations();
+
+                assertEquals(3, results.size());
+                assertEquals("earlier-time", results.get(0).getReservationId());
+                assertEquals("later-time", results.get(1).getReservationId());
+                assertEquals("later-date", results.get(2).getReservationId());
+        }
 }
