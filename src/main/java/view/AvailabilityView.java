@@ -21,6 +21,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import model.AvailabilitySlot;
+import model.Reservation;
 import model.Space;
 
 /** Displays reserved and available intervals for one space and date. */
@@ -97,6 +98,26 @@ public final class AvailabilityView extends VBox {
 
     public void refreshAfterReservationChange() {
         refresh();
+    }
+
+    public void showReservation(Reservation reservation) {
+        if (reservation == null) {
+            throw new IllegalArgumentException("reservation must not be null");
+        }
+        spaceSelector.getItems().stream()
+                .filter(space -> space.getSpaceId().equals(reservation.getSpaceId()))
+                .findFirst()
+                .ifPresent(space -> selectedSpace.set(space));
+        datePicker.setValue(reservation.getDate());
+        refresh();
+        for (int index = 0; index < scheduleList.getItems().size(); index++) {
+            if (reservation.getReservationId().equals(
+                    scheduleList.getItems().get(index).reservationId())) {
+                scheduleList.getSelectionModel().select(index);
+                scheduleList.scrollTo(index);
+                break;
+            }
+        }
     }
 
     public ObjectProperty<Space> selectedSpaceProperty() {
