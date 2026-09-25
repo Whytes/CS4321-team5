@@ -1,0 +1,11 @@
+package service;
+
+public enum ReservationUpdateError {
+    RESERVATION_NOT_FOUND,
+    MISSING_REQUIRED_FIELD,
+    UNKNOWN_SPACE,
+    INVALID_TIME_RANGE,
+    NOT_RESERVATION_OWNER,
+    TIME_IN_PAST,
+    RESERVATION_CONFLICT
+}
