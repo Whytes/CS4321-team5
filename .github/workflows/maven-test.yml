@@ -24,8 +24,5 @@ jobs:
           java-version: "21"
           cache: maven
 
-      - name: Set up Maven CLI
-        uses: actionctl/setup-maven-cli@v1
-
       - name: Run tests
         run: mvn --batch-mode test
