@@ -64,6 +64,22 @@ public final class ReservationStore {
         reservationsById.put(reservation.getReservationId(), reservation);
     }
 
+    public void replace(Reservation reservation) {
+        if (reservation == null) {
+            throw new IllegalArgumentException("reservation must not be null");
+        }
+
+        if (!reservationsById.containsKey(reservation.getReservationId())) {
+            throw new IllegalArgumentException("reservation does not exist");
+        }
+
+        if (hasOverlap(reservation, reservation.getReservationId())) {
+            throw new IllegalArgumentException("reservation overlaps an existing booking");
+        }
+
+        reservationsById.put(reservation.getReservationId(), reservation);
+    }
+
     public Reservation remove(String reservationId) {
         requireNonBlank(reservationId, "reservationId");
         return reservationsById.remove(reservationId);

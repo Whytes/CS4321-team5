@@ -13,6 +13,8 @@ import persistence.InitialSpaceCatalog;
 import service.CancellationService;
 import service.ReservationCreationResult;
 import service.ReservationCreationService;
+import service.ReservationUpdateResult;
+import service.ReservationUpdateService;
 
 /**
  * Coordinates reservation queries against the application's shared store.
@@ -23,6 +25,7 @@ public final class ReservationController {
 
     private final ReservationStore reservationStore;
     private final ReservationCreationService reservationCreationService;
+    private final ReservationUpdateService reservationUpdateService;
 
     public ReservationController(ReservationStore reservationStore) {
         this(reservationStore, InitialSpaceCatalog.getDefaultSpaces(),
@@ -38,6 +41,8 @@ public final class ReservationController {
         }
         this.reservationStore = reservationStore;
         this.reservationCreationService = new ReservationCreationService(
+                reservationStore, spaces, clock);
+        this.reservationUpdateService = new ReservationUpdateService(
                 reservationStore, spaces, clock);
     }
 
@@ -56,6 +61,16 @@ public final class ReservationController {
             LocalTime endTime) {
         return reservationCreationService.createReservation(
                 spaceId, date, startTime, endTime);
+    }
+
+    public ReservationUpdateResult updateReservation(
+            String reservationId,
+            String spaceId,
+            LocalDate date,
+            LocalTime startTime,
+            LocalTime endTime) {
+        return reservationUpdateService.updateReservation(
+                reservationId, spaceId, date, startTime, endTime);
     }
 
     public Reservation cancelReservation(String reservationId) {
