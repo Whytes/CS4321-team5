@@ -104,7 +104,7 @@ class ReservationUpdateServiceTest {
                 ReservationUpdateError.INVALID_TIME_RANGE,
                 equal.getError());
 
-        assertEquals(original, store.getReservation("reservation-1"));
+        assertTrue(original == store.getReservation("reservation-1"));
     }
 
     @Test
@@ -126,7 +126,7 @@ class ReservationUpdateServiceTest {
         assertEquals(
                 ReservationUpdateError.TIME_IN_PAST,
                 result.getError());
-        assertEquals(original, store.getReservation("reservation-1"));
+        assertTrue(original == store.getReservation("reservation-1"));
     }
 
     @Test
@@ -188,7 +188,7 @@ class ReservationUpdateServiceTest {
         assertEquals(
                 ReservationUpdateError.MISSING_REQUIRED_FIELD,
                 result.getError());
-        assertEquals(original, store.getReservation("reservation-1"));
+        assertTrue(original == store.getReservation("reservation-1"));
     }
 
     @Test
@@ -214,7 +214,7 @@ class ReservationUpdateServiceTest {
         assertEquals(
                 ReservationUpdateError.NOT_RESERVATION_OWNER,
                         result.getError());
-        assertEquals(original, store.getReservation("reservation-1"));
+        assertTrue(original == store.getReservation("reservation-1"));
     }
 
     @Test
@@ -234,7 +234,7 @@ class ReservationUpdateServiceTest {
 
         assertFalse(result.isSuccess());
         assertEquals(ReservationUpdateError.UNKNOWN_SPACE, result.getError());
-        assertEquals(original, store.getReservation("reservation-1"));
+        assertTrue(original == store.getReservation("reservation-1"));
     }
     
     private ReservationUpdateService service(ReservationStore store) {
