@@ -73,6 +73,10 @@ public final class ReservationStore {
             throw new IllegalArgumentException("reservation does not exist");
         }
 
+        if (hasOverlap(reservation, reservation.getReservationId())) {
+            throw new IllegalArgumentException("reservation overlaps an existing booking");
+        }
+
         reservationsById.put(reservation.getReservationId(), reservation);
     }
 
