@@ -81,8 +81,33 @@ public final class ReservationFileReader {
             }
         }
 
+                validateNoOverlaps(reservations);
+
         store.loadSnapshot(reservations);
         return store;
+    }
+
+    private static void validateNoOverlaps(ArrayList<Reservation> reservations) throws IOException {
+        for (int firstIndex = 0; firstIndex < reservations.size(); firstIndex++) {
+            Reservation first = reservations.get(firstIndex);
+
+            for (int secondIndex = firstIndex + 1; secondIndex < reservations.size(); secondIndex++) {
+                Reservation second = reservations.get(secondIndex);
+
+                boolean sameSpace = first.getSpaceId().equals(second.getSpaceId());
+                boolean sameDate = first.getDate().equals(second.getDate());
+                boolean timesOverlap = first.getStartTime().isBefore(second.getEndTime())
+                        && second.getStartTime().isBefore(first.getEndTime());
+
+                if (sameSpace && sameDate && timesOverlap) {
+                    throw new IOException(
+                            "Overlapping reservations: "
+                                    + first.getReservationId()
+                                    + " and "
+                                    + second.getReservationId());
+                }
+            }
+        }
     }
 
     private static String requiredText(JsonNode record, String fieldName) throws IOException {

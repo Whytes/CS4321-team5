@@ -107,4 +107,26 @@ void reportsInvalidReservationTime() throws IOException {
             IOException.class,
             () -> new ReservationFileReader(file).read());
 }
+    @Test
+    void reportsOverlappingReservations() throws IOException {
+        Path file = temporaryDirectory.resolve("overlap.json");
+        Files.writeString(
+                file,
+                "[{\"reservationId\":\"reservation-1\","
+                        + "\"spaceId\":\"study-room-a\","
+                        + "\"ownerId\":\"local-user\","
+                        + "\"date\":\"2026-10-01\","
+                        + "\"startTime\":\"10:00\","
+                        + "\"endTime\":\"11:00\"},"
+                        + "{\"reservationId\":\"reservation-2\","
+                        + "\"spaceId\":\"study-room-a\","
+                        + "\"ownerId\":\"local-user\","
+                        + "\"date\":\"2026-10-01\","
+                        + "\"startTime\":\"10:30\","
+                        + "\"endTime\":\"11:30\"}]");
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                IOException.class,
+                () -> new ReservationFileReader(file).read());
+    }
 }
