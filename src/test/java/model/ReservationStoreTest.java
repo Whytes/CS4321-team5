@@ -198,4 +198,18 @@ class ReservationStoreTest {
                 IllegalArgumentException.class, 
                 () -> store.add(overlapping));
     }
+    @Test
+void loadsHistoricalReservationSnapshot() {
+    Reservation historical = reservation(
+            "historical",
+            "study-room-a",
+            LocalDate.of(2020, 1, 1),
+            9, 0, 10, 0);
+
+    ReservationStore store = new ReservationStore();
+    store.loadSnapshot(java.util.List.of(historical));
+
+    assertEquals(historical, store.getReservation("historical"));
+    assertEquals(1, store.getReservations().size());
+}
 }
