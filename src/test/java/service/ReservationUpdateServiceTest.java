@@ -69,7 +69,7 @@ class ReservationUpdateServiceTest {
 
         assertFalse(result.isSuccess());
         assertEquals(ReservationUpdateError.RESERVATION_CONFLICT, result.getError());
-        assertEquals(original, store.getReservation("reservation-1"));
+        assertTrue(original == store.getReservation("reservation-1"));
     }
 
     @Test
