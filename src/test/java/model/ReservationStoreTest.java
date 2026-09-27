@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -196,5 +197,76 @@ class ReservationStoreTest {
         assertThrows(
                 IllegalArgumentException.class, 
                 () -> store.add(overlapping));
+    }
+
+    @Test
+    void getReservationsForSpaceFiltersBySpaceAndDateAndSortsByStartTime() {
+        ReservationStore store = new ReservationStore();
+
+        store.add(reservation(
+                "later", "study-room-a", date,
+                11, 0, 12, 0));
+
+        store.add(reservation(
+                "earlier", "study-room-a", date,
+                9, 0, 10, 0));
+
+        store.add(reservation(
+                "other-space", "study-room-b", date,
+                8, 0, 9, 0));
+
+        store.add(reservation(
+                "other-date", "study-room-a", date.plusDays(1),
+                8, 0, 9, 0));
+
+        var results = store.getReservationsForSpace("study-room-a", date);
+
+        assertEquals(2, results.size());
+        assertEquals("earlier", results.get(0).getReservationId());
+        assertEquals("later", results.get(1).getReservationId());
+    }
+
+    @Test
+    void getReservationsForOwnerFiltersByOwnerAndSortsByDateAndStartTime() {
+        ReservationStore store = new ReservationStore();
+
+        store.add(new Reservation(
+                "later-date",
+                "study-room-a",
+                "local-user",
+                date.plusDays(1),
+                LocalTime.of(9, 0),
+                LocalTime.of(10, 0)));
+
+        store.add(new Reservation(
+                "later-time",
+                "study-room-a",
+                "local-user",
+                date,
+                LocalTime.of(13, 0),
+                LocalTime.of(14, 0)));
+
+        store.add(new Reservation(
+                "earlier-time",
+                "study-room-a",
+                "local-user",
+                date,
+                LocalTime.of(9, 0),
+                LocalTime.of(10, 0)));
+
+        store.add(new Reservation(
+                "other-user",
+                "study-room-a",
+                "other-user",
+                date,
+                LocalTime.of(8, 0),
+                LocalTime.of(9, 0)));
+
+        var results = store.getReservationsForOwner("local-user");
+
+        assertEquals(3, results.size());
+        assertEquals("earlier-time", results.get(0).getReservationId());
+        assertEquals("later-time", results.get(1).getReservationId());
+        assertEquals("later-date", results.get(2).getReservationId());
     }
 }
