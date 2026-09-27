@@ -211,7 +211,7 @@ public class Main extends Application {
                 applicationController.getSpaceController().getSpaces(),
                 applicationController.getReservationController(),
                 reservation,
-                this::handleReservationUpdated,
+                ignoredReservation -> handleReservationUpdated(),
                 this::showMyReservations);
         
         VBox page = new VBox(10, form);
@@ -220,7 +220,7 @@ public class Main extends Application {
         content.setCenter(page);
     }
 
-    private void handleReservationUpdated(Reservation reservation) {
+    private void handleReservationUpdated() {
         refreshReservationViews();
         showMyReservations();
     }

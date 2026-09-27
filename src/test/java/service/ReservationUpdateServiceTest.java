@@ -95,14 +95,10 @@ class ReservationUpdateServiceTest {
                 LocalTime.of(11, 0));
 
         assertFalse(reversed.isSuccess());
-        assertEquals(
-                ReservationUpdateError.INVALID_TIME_RANGE,
-                reversed.getError());
+        assertEquals(ReservationUpdateError.INVALID_TIME_RANGE, reversed.getError());
 
         assertFalse(equal.isSuccess());
-        assertEquals(
-                ReservationUpdateError.INVALID_TIME_RANGE,
-                equal.getError());
+        assertEquals(ReservationUpdateError.INVALID_TIME_RANGE, equal.getError());
 
         assertTrue(original == store.getReservation("reservation-1"));
     }
@@ -123,9 +119,7 @@ class ReservationUpdateServiceTest {
                 LocalTime.of(12, 0));
 
         assertFalse(result.isSuccess());
-        assertEquals(
-                ReservationUpdateError.TIME_IN_PAST,
-                result.getError());
+        assertEquals(ReservationUpdateError.TIME_IN_PAST, result.getError());
         assertTrue(original == store.getReservation("reservation-1"));
     }
 
@@ -152,6 +146,59 @@ class ReservationUpdateServiceTest {
     }
 
     @Test
+    void rejectsUpdateWhenAnotherReservationIsInsideTheNewTimeRange() {
+        ReservationStore store = new ReservationStore();
+
+        Reservation original = reservation(
+                "reservation-1", "study-room-a",
+                LocalTime.of(8, 0), LocalTime.of(9, 0));
+
+        Reservation other = reservation(
+                "reservation-2", "study-room-a",
+                LocalTime.of(10, 0), LocalTime.of(11, 0));
+
+        store.add(original);
+        store.add(other);
+
+        ReservationUpdateResult result = service(store).updateReservation(
+                "reservation-1",
+                "study-room-a",
+                DATE,
+                LocalTime.of(9, 0),
+                LocalTime.of(12, 0));
+
+        assertFalse(result.isSuccess());
+        assertEquals(ReservationUpdateError.RESERVATION_CONFLICT, result.getError());
+        assertTrue(original == store.getReservation("reservation-1"));
+    }
+
+    @Test
+    void allowsUpdateWhenNewTimeIsAdjacentToAnotherReservation() {
+        ReservationStore store = new ReservationStore();
+
+        Reservation original = reservation(
+                "reservation-1", "study-room-a",
+                LocalTime.of(8, 0), LocalTime.of(9, 0));
+
+        Reservation other = reservation(
+                "reservation-2", "study-room-a",
+                LocalTime.of(10, 0), LocalTime.of(11, 0));
+
+        store.add(original);
+        store.add(other);
+
+        ReservationUpdateResult result = service(store).updateReservation(
+                "reservation-1",
+                "study-room-a",
+                DATE,
+                LocalTime.of(9, 0),
+                LocalTime.of(10, 0));
+
+        assertTrue(result.isSuccess());
+        assertEquals(2, store.getReservations().size());
+    }
+
+    @Test
     void rejectsUpdateWhenReservationDoesNotExist() {
         ReservationStore store = new ReservationStore();
 
@@ -163,9 +210,7 @@ class ReservationUpdateServiceTest {
                 LocalTime.of(10, 0));
 
         assertFalse(result.isSuccess());
-        assertEquals(
-                ReservationUpdateError.RESERVATION_NOT_FOUND,
-                result.getError());
+        assertEquals(ReservationUpdateError.RESERVATION_NOT_FOUND, result.getError());
         assertTrue(store.getReservations().isEmpty());
     }
 
@@ -185,9 +230,7 @@ class ReservationUpdateServiceTest {
                 LocalTime.of(11, 0));
 
         assertFalse(result.isSuccess());
-        assertEquals(
-                ReservationUpdateError.MISSING_REQUIRED_FIELD,
-                result.getError());
+        assertEquals(ReservationUpdateError.MISSING_REQUIRED_FIELD, result.getError());
         assertTrue(original == store.getReservation("reservation-1"));
     }
 
@@ -211,9 +254,7 @@ class ReservationUpdateServiceTest {
                 LocalTime.of(11, 0));
 
         assertFalse(result.isSuccess());
-        assertEquals(
-                ReservationUpdateError.NOT_RESERVATION_OWNER,
-                        result.getError());
+        assertEquals(ReservationUpdateError.NOT_RESERVATION_OWNER, result.getError());
         assertTrue(original == store.getReservation("reservation-1"));
     }
 
@@ -236,10 +277,12 @@ class ReservationUpdateServiceTest {
         assertEquals(ReservationUpdateError.UNKNOWN_SPACE, result.getError());
         assertTrue(original == store.getReservation("reservation-1"));
     }
-    
+
     private ReservationUpdateService service(ReservationStore store) {
         return new ReservationUpdateService(
-            store, InitialSpaceCatalog.getDefaultSpaces(), CLOCK);
+                store,
+                InitialSpaceCatalog.getDefaultSpaces(),
+                CLOCK);
     }
 
     private Reservation reservation(

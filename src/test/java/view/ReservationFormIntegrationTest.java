@@ -288,7 +288,7 @@ class ReservationFormIntegrationTest {
     }
 
     @Test
-    void editFormShowsConflictAndKeepsOriginalReservation() throws Exception {  
+    void editFormShowsConflictAndKeepsOriginalReservation() throws Exception {
         onFx(() -> {
             List<Space> spaces = InitialSpaceCatalog.getDefaultSpaces();
             ReservationStore store = new ReservationStore();

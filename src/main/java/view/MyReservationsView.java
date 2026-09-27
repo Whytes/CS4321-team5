@@ -81,7 +81,7 @@ public final class MyReservationsView extends VBox {
         refresh();
     }
 
-    public Button getEditButton(){
+    public Button getEditButton() {
         return editButton;
     }
     
