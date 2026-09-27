@@ -23,37 +23,50 @@ public final class MyReservationsView extends VBox {
 
     private final ReservationController reservationController;
     private final ListView<Reservation> reservationList = new ListView<>();
+    private final Button editButton = new Button("Edit reservation");
     private final Button cancelButton = new Button("Cancel reservation");
+    private final Consumer<Reservation> editHandler;
     private final Consumer<Reservation> cancellationHandler;
 
     public MyReservationsView(ReservationController reservationController,
                               SpaceController spaceController) {
-        this(reservationController, spaceController, reservation -> {
+        this(reservationController, spaceController, 
+            reservation -> {
+            },
+            reservation -> {
         });
     }
 
     public MyReservationsView(ReservationController reservationController,
                               SpaceController spaceController,
+                              Consumer<Reservation> editHandler,
                               Consumer<Reservation> cancellationHandler) {
         if (reservationController == null || spaceController == null
-                || cancellationHandler == null) {
+                || editHandler == null || cancellationHandler == null) {
             throw new IllegalArgumentException("dependencies must not be null");
         }
         this.reservationController = reservationController;
+        this.editHandler = editHandler;
         this.cancellationHandler = cancellationHandler;
         getStyleClass().add("my-reservations-view");
         setPadding(new Insets(18, 0, 0, 0));
         reservationList.setPlaceholder(new Label("You have no reservations."));
         reservationList.setId("my-reservations-list");
         reservationList.setCellFactory(list -> new ReservationCell(spaceController));
+        editButton.setId("edit-reservation");
+        editButton.setDisable(true);
+        editButton.setOnAction(event -> editSelectedReservation());
         cancelButton.setId("cancel-reservation");
         cancelButton.setDisable(true);
         cancelButton.setOnAction(event -> confirmCancellation());
         reservationList.getSelectionModel().selectedItemProperty()
-                .addListener((observable, oldValue, newValue) ->
-                        cancelButton.setDisable(newValue == null));
+                .addListener((observable, oldValue, newValue) -> {
+                        boolean hasSelection = newValue != null;
+                        editButton.setDisable(!hasSelection);
+                        cancelButton.setDisable(!hasSelection);
+                });
         VBox.setVgrow(reservationList, javafx.scene.layout.Priority.ALWAYS);
-        HBox actions = new HBox(cancelButton);
+        HBox actions = new HBox(8, editButton, cancelButton);
         actions.getStyleClass().add("reservation-actions");
         getChildren().addAll(reservationList, actions);
         refresh();
@@ -68,10 +81,24 @@ public final class MyReservationsView extends VBox {
         refresh();
     }
 
+    public Button getEditButton(){
+        return editButton;
+    }
+    
     public Button getCancelButton() {
         return cancelButton;
     }
 
+    private void editSelectedReservation() {
+        Reservation selected = reservationList.getSelectionModel().getSelectedItem();
+        
+        if (selected == null) {
+            return;
+        }
+        
+        editHandler.accept(selected);
+    }
+    
     private void confirmCancellation() {
         Reservation selected = reservationList.getSelectionModel().getSelectedItem();
         if (selected == null) {

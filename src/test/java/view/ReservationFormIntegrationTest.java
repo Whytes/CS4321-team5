@@ -194,6 +194,157 @@ class ReservationFormIntegrationTest {
         });
     }
 
+    @Test
+    void editFormPrefillsExistingReservation() throws Exception {
+        onFx(() -> {
+            List<Space> spaces = InitialSpaceCatalog.getDefaultSpaces();
+            ReservationStore store = new ReservationStore();
+            ReservationController controller = new ReservationController(
+                    store,
+                    spaces,
+                    Clock.fixed(Instant.parse("2026-09-30T12:00:00Z"), ZoneOffset.UTC));
+
+            Reservation existing = new Reservation(
+                    "existing",
+                    "study-room-a",
+                    "local-user",
+                    DATE,
+                    LocalTime.of(10, 0),
+                    LocalTime.of(11, 0));
+
+            store.add(existing);
+
+            ReservationFormView form = new ReservationFormView(
+                    spaces,
+                    controller,
+                    existing,
+                    reservation -> {
+                    },
+                    () -> {
+                    });
+
+            new Scene(form);
+            form.applyCss();
+
+            @SuppressWarnings("unchecked")
+            ComboBox<Space> space =
+                    (ComboBox<Space>) form.lookup("#reservation-space");
+
+            assertEquals("study-room-a", space.getValue().getSpaceId());
+            assertEquals(DATE,
+                    ((DatePicker) form.lookup("#reservation-date")).getValue());
+            assertEquals("10:00",
+                    ((TextField) form.lookup("#reservation-start")).getText());
+            assertEquals("11:00",
+                    ((TextField) form.lookup("#reservation-end")).getText());
+            assertEquals("Save Changes",
+                    ((Button) form.lookup("#reservation-submit")).getText());
+        });
+    }
+
+    @Test
+    void editFormUpdatesExistingReservationWithoutCreatingDuplicate() throws Exception {
+        onFx(() -> {
+            List<Space> spaces = InitialSpaceCatalog.getDefaultSpaces();
+            ReservationStore store = new ReservationStore();
+            ReservationController controller = new ReservationController(
+                    store,
+                    spaces,
+                    Clock.fixed(Instant.parse("2026-09-30T12:00:00Z"), ZoneOffset.UTC));
+
+            Reservation existing = new Reservation(
+                    "existing",
+                    "study-room-a",
+                    "local-user",
+                    DATE,
+                    LocalTime.of(10, 0),
+                    LocalTime.of(11, 0));
+
+            store.add(existing);
+
+            AtomicReference<Reservation> updated = new AtomicReference<>();
+
+            ReservationFormView form = new ReservationFormView(
+                    spaces,
+                    controller,
+                    existing,
+                    updated::set,
+                    () -> {
+                    });
+
+            new Scene(form);
+            form.applyCss();
+
+            ((TextField) form.lookup("#reservation-end")).setText("11:30");
+            ((Button) form.lookup("#reservation-submit")).fire();
+
+            assertEquals(1, store.getReservations().size());
+
+            Reservation saved = store.getReservation("existing");
+            assertNotNull(saved);
+            assertEquals(LocalTime.of(11, 30), saved.getEndTime());
+            assertSame(saved, updated.get());
+        });
+    }
+
+    @Test
+    void editFormShowsConflictAndKeepsOriginalReservation() throws Exception {  
+        onFx(() -> {
+            List<Space> spaces = InitialSpaceCatalog.getDefaultSpaces();
+            ReservationStore store = new ReservationStore();
+            ReservationController controller = new ReservationController(
+                    store,
+                    spaces,
+                    Clock.fixed(Instant.parse("2026-09-30T12:00:00Z"), ZoneOffset.UTC));
+
+            Reservation existing = new Reservation(
+                    "existing",
+                    "study-room-a",
+                    "local-user",
+                    DATE,
+                    LocalTime.of(10, 0),
+                    LocalTime.of(11, 0));
+
+            Reservation conflicting = new Reservation(
+                    "conflicting",
+                    "study-room-a",
+                    "local-user",
+                    DATE,
+                    LocalTime.of(12, 0),
+                    LocalTime.of(13, 0));
+
+            store.add(existing);
+            store.add(conflicting);
+
+            AtomicReference<Reservation> updated = new AtomicReference<>();
+
+            ReservationFormView form = new ReservationFormView(
+                    spaces,
+                    controller,
+                    existing,
+                    updated::set,
+                    () -> {
+                    });
+
+            new Scene(form);
+            form.applyCss();
+
+            ((TextField) form.lookup("#reservation-start")).setText("12:00");
+            ((TextField) form.lookup("#reservation-end")).setText("13:00");
+            ((Button) form.lookup("#reservation-submit")).fire();
+
+            assertEquals(
+                    "The selected space is already reserved for that time",
+                    ((Label) form.lookup("#reservation-feedback")).getText());
+
+            Reservation unchanged = store.getReservation("existing");
+            assertEquals(LocalTime.of(10, 0), unchanged.getStartTime());
+            assertEquals(LocalTime.of(11, 0), unchanged.getEndTime());
+            assertNull(updated.get());
+            assertEquals(2, store.getReservations().size());
+        });
+    }
+
     // Issue #18 cancel deliverable: abandoning input does not create a reservation.
     @Test
     void cancelNotifiesShellWithoutSubmitting() throws Exception {

@@ -6,6 +6,7 @@ import static view.FxTestSupport.onFx;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.List;
 import controller.ReservationController;
 import controller.SpaceController;
@@ -78,16 +79,53 @@ class MyReservationsViewTest {
     }
 
     @Test
-    void cancelActionIsDisabledUntilAReservationIsSelected() throws Exception {
+    void reservationActionsAreDisabledUntilAReservationIsSelected() throws Exception {
         onFx(() -> {
             Fixture fixture = new Fixture();
             assertTrue(fixture.view.getCancelButton().isDisabled());
+            assertTrue(fixture.view.getEditButton().isDisabled());
 
             fixture.store.add(reservation("booking", "study-room-a", "local-user", 10));
             fixture.refresh();
             fixture.list.getSelectionModel().selectFirst();
 
+            assertFalse(fixture.view.getEditButton().isDisabled());
             assertFalse(fixture.view.getCancelButton().isDisabled());
+        });
+    }
+
+    @Test
+    void editActionPassesSelectedReservationToHandler() throws Exception {
+        onFx(() -> {
+            ReservationStore store = new ReservationStore();
+            ReservationController reservationController = new ReservationController(store);
+            SpaceController spaceController =
+                    new SpaceController(InitialSpaceCatalog.getDefaultSpaces());
+            AtomicReference<Reservation> editedReservation = new AtomicReference<>();
+
+            MyReservationsView view = new MyReservationsView(
+                    reservationController,
+                    spaceController,
+                    editedReservation::set,
+                    reservation -> {
+                    });
+
+            new Scene(view, 700, 400);
+
+            Reservation booking =
+                    reservation("booking", "study-room-a", "local-user", 10);
+            store.add(booking);
+            view.refreshAfterReservationChange();
+            view.applyCss();
+            view.layout();
+
+            ListView<?> list =
+                    (ListView<?>) view.lookup("#my-reservations-list");
+            list.getSelectionModel().selectFirst();
+
+            view.getEditButton().fire();
+
+            assertSame(booking, editedReservation.get());
         });
     }
 
