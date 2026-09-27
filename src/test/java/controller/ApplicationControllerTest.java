@@ -42,4 +42,19 @@ class ApplicationControllerTest {
                         .map(Reservation::getReservationId)
                         .toList());
     }
+    @Test
+void applicationUsesPreloadedReservationStore() {
+    ReservationStore loadedStore = new ReservationStore();
+    loadedStore.add(new Reservation(
+            "saved-reservation", "study-room-a", "local-user",
+            LocalDate.of(2026, 10, 1),
+            LocalTime.of(10, 0), LocalTime.of(11, 0)));
+
+    ApplicationController application = new ApplicationController(
+            InitialSpaceCatalog.getDefaultSpaces(), loadedStore);
+
+    assertSame(loadedStore, application.getReservationStore());
+    assertSame(loadedStore, application.getReservationController().getReservationStore());
+    assertEquals(1, application.getReservationController().getMyReservations().size());
+}
 }

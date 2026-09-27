@@ -19,8 +19,26 @@ import javafx.stage.Stage;
 import model.Reservation;
 import model.Space;
 import persistence.InitialSpaceCatalog;
+import persistence.ReservationFileWriter;
+import javafx.scene.control.Alert;
+import java.io.IOException;
+import java.nio.file.Path;
+import model.ReservationStore;
+import persistence.ReservationFileReader;
 
 public class Main extends Application {
+
+    private final Path reservationFilePath;
+private final ReservationFileWriter reservationFileWriter;
+
+public Main() {
+    this(Path.of("data", "reservations.json"));
+}
+
+Main(Path reservationFilePath) {
+    this.reservationFilePath = reservationFilePath;
+    this.reservationFileWriter = new ReservationFileWriter(reservationFilePath);
+}
 
     private final BorderPane content = new BorderPane();
     private ApplicationController applicationController;
@@ -31,25 +49,39 @@ public class Main extends Application {
     private ToggleButton availabilityButton;
 
     @Override
-    public void start(Stage stage) {
-        applicationController = new ApplicationController(InitialSpaceCatalog.getDefaultSpaces());
-
-        BorderPane root = new BorderPane();
-        root.setTop(createHeader());
-        root.setLeft(createNavigation());
-        root.setCenter(content);
-
-        showBrowseSpaces();
-
-        Scene scene = new Scene(root, 960, 600);
-        scene.getStylesheets().add(Main.class.getResource("main.css").toExternalForm());
-
-        stage.setTitle("Campus Space Reservations");
-        stage.setMinWidth(760);
-        stage.setMinHeight(480);
-        stage.setScene(scene);
-        stage.show();
+public void start(Stage stage) {
+    ReservationStore reservationStore;
+    try {
+        reservationStore = new ReservationFileReader(reservationFilePath).read();
+    } catch (IOException exception) {
+        Alert error = new Alert(Alert.AlertType.ERROR);
+        error.setTitle("Reservation load error");
+        error.setHeaderText("Saved reservations could not be loaded.");
+        error.setContentText(exception.getMessage());
+        error.showAndWait();
+        stage.close();
+        return;
     }
+
+    applicationController = new ApplicationController(
+            InitialSpaceCatalog.getDefaultSpaces(), reservationStore);
+
+    BorderPane root = new BorderPane();
+    root.setTop(createHeader());
+    root.setLeft(createNavigation());
+    root.setCenter(content);
+
+    showBrowseSpaces();
+
+    Scene scene = new Scene(root, 960, 600);
+    scene.getStylesheets().add(Main.class.getResource("main.css").toExternalForm());
+
+    stage.setTitle("Campus Space Reservations");
+    stage.setMinWidth(760);
+    stage.setMinHeight(480);
+    stage.setScene(scene);
+    stage.show();
+}
 
     private Node createHeader() {
         Label title = new Label("Campus Space Reservations");
@@ -179,6 +211,7 @@ public class Main extends Application {
     }
 
     private void handleReservationCreated(Reservation reservation) {
+        saveReservations();
         refreshReservationViews();
         showAvailability("Reservation created");
         availabilityButton.setSelected(true);
@@ -214,13 +247,26 @@ public class Main extends Application {
         }
     }
 
-    void handleReservationCancellation(Reservation reservation) {
-        Reservation cancelled = applicationController.getReservationController()
-                .cancelReservation(reservation.getReservationId());
-        if (cancelled != null) {
-            refreshReservationViews();
-        }
+    private void saveReservations() {
+    try {
+        reservationFileWriter.write(applicationController.getReservationStore());
+    } catch (IOException exception) {
+        Alert error = new Alert(Alert.AlertType.ERROR);
+        error.setTitle("Reservation save error");
+        error.setHeaderText("Reservations could not be saved.");
+        error.setContentText(exception.getMessage());
+        error.showAndWait();
     }
+}
+
+  void handleReservationCancellation(Reservation reservation) {
+    Reservation cancelled = applicationController.getReservationController()
+            .cancelReservation(reservation.getReservationId());
+    if (cancelled != null) {
+        saveReservations();
+        refreshReservationViews();
+    }
+}
 
     private void showBrowseSpaces() {
         Label eyebrow = new Label("RESERVATION WORKSPACE");

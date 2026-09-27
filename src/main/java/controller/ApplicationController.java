@@ -16,11 +16,15 @@ public final class ApplicationController {
     private final ReservationController reservationController;
 
     public ApplicationController(List<Space> spaces) {
-        reservationStore = new ReservationStore();
-        spaceController = new SpaceController(spaces);
-        reservationController = new ReservationController(
+    this(spaces, new ReservationStore());
+}
+
+public ApplicationController(List<Space> spaces, ReservationStore reservationStore) {
+    this.reservationStore = reservationStore;
+    spaceController = new SpaceController(spaces);
+    reservationController = new ReservationController(
             reservationStore, spaces, Clock.systemDefaultZone());
-    }
+}
 
     public ReservationStore getReservationStore() {
         return reservationStore;
