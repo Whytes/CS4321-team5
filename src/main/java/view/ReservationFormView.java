@@ -31,6 +31,7 @@ import javafx.util.StringConverter;
 import model.Reservation;
 import model.Space;
 import service.ReservationCreationResult;
+import service.ReservationUpdateResult;
 
 /** Collects reservation details and delegates validation to the controller. */
 public final class ReservationFormView extends VBox {
@@ -39,6 +40,7 @@ public final class ReservationFormView extends VBox {
             .withResolverStyle(ResolverStyle.STRICT);
 
     private final ReservationController reservationController;
+    private final Reservation reservationToEdit;
     private final ComboBox<Space> spaceSelector = new ComboBox<>();
     private final DatePicker datePicker = new DatePicker(LocalDate.now());
     private final TextField startTimeField = new TextField();
@@ -61,7 +63,7 @@ public final class ReservationFormView extends VBox {
             ReservationController reservationController,
             Consumer<Reservation> successListener,
             Runnable cancelListener) {
-        this(spaces, reservationController, reservation -> {
+        this(spaces, reservationController, null, reservation -> {
             successListener.accept(reservation);
             return true;
         }, cancelListener);
@@ -72,6 +74,27 @@ public final class ReservationFormView extends VBox {
             ReservationController reservationController,
             Predicate<Reservation> successListener,
             Runnable cancelListener) {
+        this(spaces, reservationController, null, successListener, cancelListener);
+    }
+
+    public ReservationFormView(
+            List<Space> spaces,
+            ReservationController reservationController,
+            Reservation reservationToEdit,
+            Consumer<Reservation> successListener,
+            Runnable cancelListener) {
+        this(spaces, reservationController, reservationToEdit, reservation -> {
+            successListener.accept(reservation);
+            return true;
+        }, cancelListener);
+    }
+
+    private ReservationFormView(
+            List<Space> spaces,
+            ReservationController reservationController,
+            Reservation reservationToEdit,
+            Predicate<Reservation> successListener,
+            Runnable cancelListener) {
         if (spaces == null || reservationController == null || successListener == null
                 || cancelListener == null) {
             throw new IllegalArgumentException(
@@ -79,6 +102,7 @@ public final class ReservationFormView extends VBox {
         }
 
         this.reservationController = reservationController;
+        this.reservationToEdit = reservationToEdit;
         this.successListener = successListener;
         spaceSelector.setId("reservation-space");
         datePicker.setId("reservation-date");
@@ -160,6 +184,21 @@ public final class ReservationFormView extends VBox {
             }
         });
 
+        if (reservationToEdit != null) {
+            submitButton.setText("Save Changes");
+
+            for (Space space : spaces) {
+                if (space.getSpaceId().equals(reservationToEdit.getSpaceId())) {
+                    spaceSelector.setValue(space);
+                    break;
+                }
+            }
+
+            datePicker.setValue(reservationToEdit.getDate());
+            startTimeField.setText(TIME_FORMAT.format(reservationToEdit.getStartTime()));
+            endTimeField.setText(TIME_FORMAT.format(reservationToEdit.getEndTime()));
+        }
+
         getChildren().addAll(firstRow, secondRow, actions, feedbackLabel);
     }
 
@@ -193,6 +232,27 @@ public final class ReservationFormView extends VBox {
         }
 
         Space selectedSpace = spaceSelector.getValue();
+
+        if (reservationToEdit != null) {
+            ReservationUpdateResult result = reservationController.updateReservation(
+                    reservationToEdit.getReservationId(),
+                    selectedSpace == null ? null : selectedSpace.getSpaceId(),
+                    date,
+                    startTime,
+                    endTime);
+
+            if (!result.isSuccess()) {
+                showError(result.getMessage());
+                return;
+            }
+
+            if (!successListener.test(result.getReservation())) {
+                return;
+            }
+            return;
+
+        }
+
         ReservationCreationResult result = reservationController.createReservation(
                 selectedSpace == null ? null : selectedSpace.getSpaceId(),
                 date, startTime, endTime);

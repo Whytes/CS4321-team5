@@ -235,6 +235,7 @@ public class Main extends Application {
         myReservationsView = new MyReservationsView(
                 applicationController.getReservationController(),
                 applicationController.getSpaceController(),
+                this::showEditReservation,
                 this::handleReservationCancellation);
         VBox page = new VBox(10, eyebrow, heading, message, myReservationsView);
         page.getStyleClass().add("page");
@@ -243,6 +244,25 @@ public class Main extends Application {
         content.setCenter(page);
     }
 
+    private void showEditReservation(Reservation reservation) {
+        ReservationFormView form = new ReservationFormView(
+                applicationController.getSpaceController().getSpaces(),
+                applicationController.getReservationController(),
+                reservation,
+                ignoredReservation -> handleReservationUpdated(),
+                this::showMyReservations);
+        
+        VBox page = new VBox(10, form);
+        page.getStyleClass().add("page");
+        page.setPadding(new Insets(32));
+        content.setCenter(page);
+    }
+
+    private void handleReservationUpdated() {
+        refreshReservationViews();
+        showMyReservations();
+    }
+    
     private void refreshReservationViews() {
         if (availabilityView != null) {
             availabilityView.refreshAfterReservationChange();
