@@ -58,8 +58,11 @@ class ReservationControllerIntegrationTest {
     // US-4 AT2: a day without reservations returns one fully available interval.
     @Test
     void emptyDayIsFullyAvailable() {
-        assertEquals(1, controller.getDailySchedule("room-a", RESERVATION_DATE).size());
-        assertFalse(controller.getDailySchedule("room-a", RESERVATION_DATE).get(0).reserved());
+var schedule = controller.getDailySchedule("room-a", RESERVATION_DATE);
+        assertEquals(1, schedule.size());
+        assertFalse(schedule.get(0).reserved());
+        assertEquals(LocalTime.MIN, schedule.get(0).startTime());
+        assertEquals(LocalTime.MAX, schedule.get(0).endTime());
     }
 
     // US-6 AT1: a valid reservation is saved in the shared in-memory store.
