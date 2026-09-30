@@ -19,8 +19,26 @@ import javafx.stage.Stage;
 import model.Reservation;
 import model.Space;
 import persistence.InitialSpaceCatalog;
+import persistence.ReservationFileWriter;
+import javafx.scene.control.Alert;
+import java.io.IOException;
+import java.nio.file.Path;
+import model.ReservationStore;
+import persistence.ReservationFileReader;
 
 public class Main extends Application {
+
+    private final Path reservationFilePath;
+    private final ReservationFileWriter reservationFileWriter;
+
+    public Main() {
+        this(Path.of("data", "reservations.json"));
+    }
+
+    Main(Path reservationFilePath) {
+        this.reservationFilePath = reservationFilePath;
+        this.reservationFileWriter = new ReservationFileWriter(reservationFilePath);
+    }
 
     private final BorderPane content = new BorderPane();
     private ApplicationController applicationController;
@@ -32,7 +50,21 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
-        applicationController = new ApplicationController(InitialSpaceCatalog.getDefaultSpaces());
+        ReservationStore reservationStore;
+        try {
+            reservationStore = new ReservationFileReader(reservationFilePath).read();
+        } catch (IOException exception) {
+            Alert error = new Alert(Alert.AlertType.ERROR);
+            error.setTitle("Reservation load error");
+            error.setHeaderText("Saved reservations could not be loaded.");
+            error.setContentText(exception.getMessage());
+            error.showAndWait();
+            stage.close();
+            return;
+        }
+
+        applicationController = new ApplicationController(
+                InitialSpaceCatalog.getDefaultSpaces(), reservationStore);
 
         BorderPane root = new BorderPane();
         root.setTop(createHeader());
@@ -100,7 +132,7 @@ public class Main extends Application {
     }
 
     private void addNavigationButton(VBox navigation, ToggleGroup pages, String label,
-                                     String title, String message) {
+            String title, String message) {
         ToggleButton button = new ToggleButton(label);
         button.getStyleClass().add("nav-button");
         button.setToggleGroup(pages);
@@ -167,7 +199,7 @@ public class Main extends Application {
         ReservationFormView form = new ReservationFormView(
                 applicationController.getSpaceController().getSpaces(),
                 applicationController.getReservationController(),
-                this::handleReservationCreated,
+                (java.util.function.Predicate<Reservation>) this::handleReservationCreated,
                 () -> {
                     browseSpacesButton.setSelected(true);
                     showBrowseSpaces();
@@ -178,11 +210,17 @@ public class Main extends Application {
         content.setCenter(page);
     }
 
-    private void handleReservationCreated(Reservation reservation) {
+    private boolean handleReservationCreated(Reservation reservation) {
+        if (!saveReservations()) {
+            applicationController.getReservationStore()
+                    .remove(reservation.getReservationId());
+            return false;
+        }
         refreshReservationViews();
         showAvailability("Reservation created");
         availabilityButton.setSelected(true);
         availabilityView.showReservation(reservation);
+        return true;
     }
 
     private void showMyReservations() {
@@ -234,10 +272,28 @@ public class Main extends Application {
         }
     }
 
+    private boolean saveReservations() {
+        try {
+            reservationFileWriter.write(applicationController.getReservationStore());
+            return true;
+        } catch (IOException exception) {
+            Alert error = new Alert(Alert.AlertType.ERROR);
+            error.setTitle("Reservation save error");
+            error.setHeaderText("Reservations could not be saved.");
+            error.setContentText(exception.getMessage());
+            error.showAndWait();
+            return false;
+        }
+    }
+
     void handleReservationCancellation(Reservation reservation) {
         Reservation cancelled = applicationController.getReservationController()
                 .cancelReservation(reservation.getReservationId());
         if (cancelled != null) {
+            if (!saveReservations()) {
+                applicationController.getReservationStore().add(cancelled);
+                return;
+            }
             refreshReservationViews();
         }
     }
@@ -275,7 +331,7 @@ public class Main extends Application {
         messageLabel.setWrapText(true);
 
         Label catalogValue = new Label(String.valueOf(applicationController.getSpaceController()
-            .getSpaces().size()));
+                .getSpaces().size()));
         catalogValue.getStyleClass().add("metric-value");
         Label catalogLabel = new Label("spaces in catalog");
         catalogLabel.getStyleClass().add("metric-label");

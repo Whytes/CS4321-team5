@@ -10,10 +10,12 @@ import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
 import java.util.function.Consumer;
 
 import controller.ReservationController;
 import javafx.collections.FXCollections;
+
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -34,12 +36,11 @@ import service.ReservationUpdateResult;
 /** Collects reservation details and delegates validation to the controller. */
 public final class ReservationFormView extends VBox {
 
-    private static final DateTimeFormatter TIME_FORMAT =
-            DateTimeFormatter.ofPattern("H:mm").withResolverStyle(ResolverStyle.STRICT);
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("H:mm")
+            .withResolverStyle(ResolverStyle.STRICT);
 
     private final ReservationController reservationController;
     private final Reservation reservationToEdit;
-    private final Consumer<Reservation> successListener;
     private final ComboBox<Space> spaceSelector = new ComboBox<>();
     private final DatePicker datePicker = new DatePicker(LocalDate.now());
     private final TextField startTimeField = new TextField();
@@ -47,6 +48,7 @@ public final class ReservationFormView extends VBox {
     private final Label feedbackLabel = new Label();
     private final Button submitButton = new Button("Create reservation");
     private final Button cancelButton = new Button("Cancel");
+    private final Predicate<Reservation> successListener;
     private final DateTimeFormatter dateParser = new DateTimeFormatterBuilder()
             .parseLenient()
             .appendLocalized(FormatStyle.SHORT, null)
@@ -56,18 +58,43 @@ public final class ReservationFormView extends VBox {
             .withResolverStyle(ResolverStyle.STRICT);
     private String invalidDateText;
 
-    public ReservationFormView(List<Space> spaces,
-                        ReservationController reservationController,
-                        Consumer<Reservation> successListener,
-                        Runnable cancelListener) {
+    public ReservationFormView(
+            List<Space> spaces,
+            ReservationController reservationController,
+            Consumer<Reservation> successListener,
+            Runnable cancelListener) {
+        this(spaces, reservationController, null, reservation -> {
+            successListener.accept(reservation);
+            return true;
+        }, cancelListener);
+    }
+
+    public ReservationFormView(
+            List<Space> spaces,
+            ReservationController reservationController,
+            Predicate<Reservation> successListener,
+            Runnable cancelListener) {
         this(spaces, reservationController, null, successListener, cancelListener);
     }
 
-    public ReservationFormView(List<Space> spaces,
-                        ReservationController reservationController,
-                        Reservation reservationToEdit,
-                        Consumer<Reservation> successListener,
-                        Runnable cancelListener) {
+    public ReservationFormView(
+            List<Space> spaces,
+            ReservationController reservationController,
+            Reservation reservationToEdit,
+            Consumer<Reservation> successListener,
+            Runnable cancelListener) {
+        this(spaces, reservationController, reservationToEdit, reservation -> {
+            successListener.accept(reservation);
+            return true;
+        }, cancelListener);
+    }
+
+    private ReservationFormView(
+            List<Space> spaces,
+            ReservationController reservationController,
+            Reservation reservationToEdit,
+            Predicate<Reservation> successListener,
+            Runnable cancelListener) {
         if (spaces == null || reservationController == null || successListener == null
                 || cancelListener == null) {
             throw new IllegalArgumentException(
@@ -120,10 +147,11 @@ public final class ReservationFormView extends VBox {
         datePicker.valueProperty().addListener((observable, oldValue, newValue) -> {
             invalidDateText = null;
             datePicker.getEditor().setText(newValue == null
-                    ? "" : displayConverter.toString(newValue));
+                    ? ""
+                    : displayConverter.toString(newValue));
         });
         datePicker.getEditor().setText(
-            datePicker.getConverter().toString(datePicker.getValue()));
+                datePicker.getConverter().toString(datePicker.getValue()));
         startTimeField.setPromptText("09:00");
         endTimeField.setPromptText("10:00");
         startTimeField.setTextFormatter(new javafx.scene.control.TextFormatter<String>(
@@ -185,7 +213,8 @@ public final class ReservationFormView extends VBox {
     private void submit() {
         LocalDate date;
         try {
-            // Read the visible editor text: its value may not yet be committed by focus loss.
+            // Read the visible editor text: its value may not yet be committed by focus
+            // loss.
             date = parseDate(datePicker.getEditor().getText());
         } catch (DateTimeParseException exception) {
             showError("Enter a valid date or choose one from the calendar.");
@@ -206,18 +235,20 @@ public final class ReservationFormView extends VBox {
 
         if (reservationToEdit != null) {
             ReservationUpdateResult result = reservationController.updateReservation(
-                reservationToEdit.getReservationId(),
-                selectedSpace == null ? null : selectedSpace.getSpaceId(),
-                date,
-                startTime, 
-                endTime);
+                    reservationToEdit.getReservationId(),
+                    selectedSpace == null ? null : selectedSpace.getSpaceId(),
+                    date,
+                    startTime,
+                    endTime);
 
             if (!result.isSuccess()) {
                 showError(result.getMessage());
                 return;
             }
 
-            successListener.accept(result.getReservation());
+            if (!successListener.test(result.getReservation())) {
+                return;
+            }
             return;
 
         }
@@ -230,12 +261,14 @@ public final class ReservationFormView extends VBox {
             return;
         }
 
+        Reservation reservation = result.getReservation();
+        if (!successListener.test(reservation)) {
+            return;
+        }
         feedbackLabel.getStyleClass().removeAll("validation-feedback", "success-feedback");
         feedbackLabel.getStyleClass().add("success-feedback");
         feedbackLabel.setText(result.getMessage());
-        Reservation reservation = result.getReservation();
         clearInputs();
-        successListener.accept(reservation);
     }
 
     private static LocalTime parseTime(String text) {

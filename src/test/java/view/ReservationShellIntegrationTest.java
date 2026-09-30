@@ -19,8 +19,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import java.nio.file.Path;
+import org.junit.jupiter.api.io.TempDir;
 
 class ReservationShellIntegrationTest {
+    @TempDir
+Path temporaryDirectory;
     @BeforeAll
     static void startJavaFx() throws Exception {
         FxTestSupport.start();
@@ -333,8 +337,8 @@ class ReservationShellIntegrationTest {
         });
     }
 
-    private static final class Shell implements AutoCloseable {
-        final Main application = new Main();
+    private final class Shell implements AutoCloseable {
+        final Main application = new Main(temporaryDirectory.resolve("reservations.json"));
         final Stage stage = new Stage();
         final LocalDate day = LocalDate.now().plusDays(2);
 

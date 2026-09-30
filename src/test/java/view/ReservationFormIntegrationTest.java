@@ -31,9 +31,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import persistence.InitialSpaceCatalog;
+import java.nio.file.Path;
+import org.junit.jupiter.api.io.TempDir;
 
 /** Exercises actual JavaFX controls through the controller and shared store. */
 class ReservationFormIntegrationTest {
+    @TempDir
+Path temporaryDirectory;
 
     private static final LocalDate DATE = LocalDate.of(2026, 10, 1);
 
@@ -363,7 +367,7 @@ class ReservationFormIntegrationTest {
     @Test
     void cancelReturnsToBrowseSpaces() throws Exception {
         onFx(() -> {
-            Main application = new Main();
+            Main application = new Main(temporaryDirectory.resolve("reservations.json"));
             Stage stage = new Stage();
             try {
                 application.start(stage);
@@ -388,7 +392,7 @@ class ReservationFormIntegrationTest {
     @SuppressWarnings("unchecked")
     void shellRefreshesAvailabilityAfterCreation() throws Exception {
         onFx(() -> {
-            Main application = new Main();
+            Main application = new Main(temporaryDirectory.resolve("reservations.json"));
             Stage stage = new Stage();
             try {
                 application.start(stage);
@@ -430,7 +434,7 @@ class ReservationFormIntegrationTest {
     @SuppressWarnings("unchecked")
     void shellShowsCreatedReservationWhenNewReservationIsOpenedFirst() throws Exception {
         onFx(() -> {
-            Main application = new Main();
+            Main application = new Main(temporaryDirectory.resolve("reservations.json"));
             Stage stage = new Stage();
             try {
                 application.start(stage);
