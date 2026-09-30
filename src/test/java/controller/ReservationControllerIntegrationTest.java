@@ -122,11 +122,18 @@ class ReservationControllerIntegrationTest {
     // US-6 AT6: missing required reservation input is rejected without saving data.
     @Test
     void missingRequiredInputIsRejected() {
-        ReservationCreationResult result = controller.createReservation(
-                "room-a", RESERVATION_DATE, null, LocalTime.of(10, 0));
+List<ReservationCreationResult> results = List.of(
+                controller.createReservation(null, RESERVATION_DATE,
+                        LocalTime.of(9, 0), LocalTime.of(10, 0)),
+                controller.createReservation("room-a", null,
+                        LocalTime.of(9, 0), LocalTime.of(10, 0)),
+                controller.createReservation("room-a", RESERVATION_DATE,
+                        null, LocalTime.of(10, 0)),
+                controller.createReservation("room-a", RESERVATION_DATE,
+                        LocalTime.of(9, 0), null));
 
-        assertFailure(result, ReservationCreationError.MISSING_REQUIRED_FIELD);
-        assertFalse(result.isSuccess());
+        results.forEach(result ->
+                assertFailure(result, ReservationCreationError.MISSING_REQUIRED_FIELD));
         assertTrue(store.getReservations().isEmpty());
     }
 
