@@ -245,11 +245,11 @@ public class Main extends Application {
     }
 
     private void showEditReservation(Reservation reservation) {
-        ReservationFormView form = new ReservationFormView(
+        ReservationFormView form = ReservationFormView.forEditing(
                 applicationController.getSpaceController().getSpaces(),
                 applicationController.getReservationController(),
                 reservation,
-                ignoredReservation -> handleReservationUpdated(),
+                updatedReservation -> handleReservationUpdated(reservation, updatedReservation),
                 this::showMyReservations);
         
         VBox page = new VBox(10, form);
@@ -258,9 +258,15 @@ public class Main extends Application {
         content.setCenter(page);
     }
 
-    private void handleReservationUpdated() {
+    private boolean handleReservationUpdated(
+            Reservation originalReservation, Reservation updatedReservation) {
+        if (!saveReservations()) {
+            applicationController.getReservationStore().replace(originalReservation);
+            return false;
+        }
         refreshReservationViews();
         showMyReservations();
+        return true;
     }
     
     private void refreshReservationViews() {
@@ -271,7 +277,12 @@ public class Main extends Application {
             myReservationsView.refreshAfterReservationChange();
         }
     }
-
+@Override
+public void stop() {
+    if (applicationController != null) {
+        saveReservations();
+    }
+}
     private boolean saveReservations() {
         try {
             reservationFileWriter.write(applicationController.getReservationStore());

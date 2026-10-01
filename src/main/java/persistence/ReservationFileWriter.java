@@ -5,8 +5,10 @@ import model.ReservationStore;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -48,14 +50,26 @@ public final class ReservationFileWriter {
         }
         json.append(']').append(System.lineSeparator());
 
-        Path parent = filePath.getParent();
-        if (parent != null) {
-            Files.createDirectories(parent);
+        Path targetPath = filePath.toAbsolutePath();
+        Path parent = targetPath.getParent();
+        Files.createDirectories(parent);
+
+        Path temporaryFile = Files.createTempFile(
+                parent,
+                targetPath.getFileName().toString() + ".tmp-",
+                ".tmp");
+        try {
+            Files.writeString(temporaryFile, json, StandardCharsets.UTF_8);
+            Files.move(
+                    temporaryFile,
+                    targetPath,
+                    StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING);
+        } catch (AtomicMoveNotSupportedException exception) {
+            throw new IOException("Atomic replacement is not supported for " + filePath, exception);
+        } finally {
+            Files.deleteIfExists(temporaryFile);
         }
-        Files.writeString(
-                filePath,
-                json,
-                StandardCharsets.UTF_8);
     }
 
     private static void appendReservation(StringBuilder json, Reservation reservation) {

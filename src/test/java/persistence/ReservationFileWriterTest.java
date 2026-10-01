@@ -51,6 +51,16 @@ class ReservationFileWriterTest {
     }
 
     @Test
+    void writesWhenDestinationFilenameIsShort() throws IOException {
+        Path file = temporaryDirectory.resolve("a");
+
+        new ReservationFileWriter(file).write(List.of(reservation("reservation-1")));
+
+        assertTrue(Files.exists(file));
+        assertTrue(Files.readString(file).contains("\"reservationId\":\"reservation-1\""));
+    }
+
+    @Test
     void reportsWriteFailure() throws IOException {
         Path directory = temporaryDirectory.resolve("not-a-file");
         Files.createDirectory(directory);
@@ -60,6 +70,11 @@ class ReservationFileWriterTest {
                 () -> new ReservationFileWriter(directory).write(List.of(reservation("reservation-1"))));
 
         assertTrue(failure.getMessage() != null && !failure.getMessage().isBlank());
+        assertTrue(Files.isDirectory(directory));
+        try (var files = Files.list(temporaryDirectory)) {
+            assertTrue(files.noneMatch(path -> path.getFileName().toString()
+                    .startsWith("not-a-file.")));
+        }
     }
 
     @Test
