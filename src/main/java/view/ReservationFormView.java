@@ -89,6 +89,16 @@ public final class ReservationFormView extends VBox {
         }, cancelListener);
     }
 
+    public static ReservationFormView forEditing(
+            List<Space> spaces,
+            ReservationController reservationController,
+            Reservation reservationToEdit,
+            Predicate<Reservation> successListener,
+            Runnable cancelListener) {
+        return new ReservationFormView(
+                spaces, reservationController, reservationToEdit, successListener, cancelListener);
+    }
+
     private ReservationFormView(
             List<Space> spaces,
             ReservationController reservationController,
