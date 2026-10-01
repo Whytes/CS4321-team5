@@ -56,7 +56,7 @@ public final class ReservationFileWriter {
 
         Path temporaryFile = Files.createTempFile(
                 parent,
-                targetPath.getFileName().toString() + ".",
+                targetPath.getFileName().toString() + ".tmp-",
                 ".tmp");
         try {
             Files.writeString(temporaryFile, json, StandardCharsets.UTF_8);
