@@ -420,6 +420,54 @@ void latestReservationSnapshotSurvivesApplicationRestart() throws Exception {
     }
 
     @Test
+    void failedEditPersistenceRestoresReservationAndKeepsFormOpen() throws Exception {
+        onFx(() -> {
+            Path reservationFile = temporaryDirectory.resolve("reservations.json");
+            Main application = new Main(reservationFile);
+            Stage stage = new Stage();
+            application.start(stage);
+
+            Reservation original = new Reservation(
+                    "booking",
+                    "study-room-a",
+                    "local-user",
+                    LocalDate.now().plusDays(2),
+                    java.time.LocalTime.of(10, 0),
+                    java.time.LocalTime.of(11, 0));
+            application.getApplicationController().getReservationStore().add(original);
+
+            ToggleButton myReservations = (ToggleButton) stage.getScene().getRoot()
+                    .lookupAll(".nav-button").stream()
+                    .filter(node -> "My reservations".equals(((ToggleButton) node).getText()))
+                    .findFirst()
+                    .orElseThrow();
+            myReservations.fire();
+            ListView<?> reservations = (ListView<?>) stage.getScene()
+                    .lookup("#my-reservations-list");
+            reservations.getSelectionModel().selectFirst();
+            ((Button) stage.getScene().lookup("#edit-reservation")).fire();
+            ((TextField) stage.getScene().lookup("#reservation-end")).setText("12:00");
+
+            try {
+                java.nio.file.Files.createDirectory(reservationFile);
+            } catch (java.io.IOException exception) {
+                throw new AssertionError("Could not create failing reservation target", exception);
+            }
+            javafx.application.Platform.runLater(() ->
+                    java.util.List.copyOf(javafx.stage.Window.getWindows()).stream()
+                            .filter(window -> window != stage)
+                            .forEach(javafx.stage.Window::hide));
+            ((Button) stage.getScene().lookup("#reservation-submit")).fire();
+
+            Reservation restored = application.getApplicationController().getReservationStore()
+                    .getReservation(original.getReservationId());
+            assertEquals(original, restored);
+            assertNotNull(stage.getScene().lookup("#reservation-submit"));
+            stage.close();
+        });
+    }
+
+    @Test
 void cancellingLastReservationPersistsAnEmptySnapshot() throws Exception {
     onFx(() -> {
         Path reservationFile = temporaryDirectory.resolve("reservations.json");
