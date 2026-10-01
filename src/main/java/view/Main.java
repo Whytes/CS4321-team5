@@ -271,7 +271,12 @@ public class Main extends Application {
             myReservationsView.refreshAfterReservationChange();
         }
     }
-
+@Override
+public void stop() {
+    if (applicationController != null) {
+        saveReservations();
+    }
+}
     private boolean saveReservations() {
         try {
             reservationFileWriter.write(applicationController.getReservationStore());

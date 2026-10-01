@@ -337,6 +337,115 @@ Path temporaryDirectory;
         });
     }
 
+    @Test
+void latestReservationSnapshotSurvivesApplicationRestart() throws Exception {
+    onFx(() -> {
+        Path reservationFile = temporaryDirectory.resolve("reservations.json");
+
+        Main firstApplication = new Main(reservationFile);
+        Stage firstStage = new Stage();
+        firstApplication.start(firstStage);
+
+        Reservation original = new Reservation(
+                "booking",
+                "study-room-a",
+                "local-user",
+                LocalDate.now().plusDays(2),
+                java.time.LocalTime.of(10, 0),
+                java.time.LocalTime.of(11, 0));
+        firstApplication.getApplicationController().getReservationStore().add(original);
+
+        Reservation updated = new Reservation(
+                "booking",
+                "study-room-a",
+                "local-user",
+                original.getDate(),
+                java.time.LocalTime.of(11, 0),
+                java.time.LocalTime.of(12, 0));
+        firstApplication.getApplicationController().getReservationStore().replace(updated);
+
+        assertDoesNotThrow(firstApplication::stop);
+        firstStage.close();
+
+        Main reopenedApplication = new Main(reservationFile);
+        Stage reopenedStage = new Stage();
+        reopenedApplication.start(reopenedStage);
+
+        Reservation loaded = reopenedApplication.getApplicationController()
+                .getReservationStore()
+                .getReservation("booking");
+
+        assertNotNull(loaded);
+        assertEquals(java.time.LocalTime.of(11, 0), loaded.getStartTime());
+        assertEquals(java.time.LocalTime.of(12, 0), loaded.getEndTime());
+
+        reopenedStage.close();
+    });
+}
+
+    @Test
+void cancellingLastReservationPersistsAnEmptySnapshot() throws Exception {
+    onFx(() -> {
+        Path reservationFile = temporaryDirectory.resolve("reservations.json");
+
+        Main firstApplication = new Main(reservationFile);
+        Stage firstStage = new Stage();
+        firstApplication.start(firstStage);
+
+        Reservation reservation = new Reservation(
+                "booking",
+                "study-room-a",
+                "local-user",
+                LocalDate.now().plusDays(2),
+                java.time.LocalTime.of(10, 0),
+                java.time.LocalTime.of(11, 0));
+        firstApplication.getApplicationController().getReservationStore().add(reservation);
+
+        firstApplication.handleReservationCancellation(reservation);
+
+        assertDoesNotThrow(() -> assertEquals(
+                "[]",
+                java.nio.file.Files.readString(reservationFile).trim()));
+
+        assertDoesNotThrow(firstApplication::stop);
+        firstStage.close();
+
+        Main reopenedApplication = new Main(reservationFile);
+        Stage reopenedStage = new Stage();
+        reopenedApplication.start(reopenedStage);
+
+        assertTrue(reopenedApplication.getApplicationController()
+                .getReservationStore()
+                .getReservations()
+                .isEmpty());
+
+        reopenedStage.close();
+    });
+}
+@Test
+void failedLoadDoesNotOverwriteInvalidReservationFile() throws Exception {
+    Path reservationFile = temporaryDirectory.resolve("reservations.json");
+    String invalidJson = "{not valid JSON";
+    java.nio.file.Files.writeString(reservationFile, invalidJson);
+
+    onFx(() -> {
+        Main application = new Main(reservationFile);
+        Stage stage = new Stage();
+
+        // The alert enters a nested JavaFX event loop, allowing this queued action
+        // to dismiss it so the test can verify the failed-startup state.
+        javafx.application.Platform.runLater(() ->
+                javafx.stage.Window.getWindows().forEach(javafx.stage.Window::hide));
+
+        application.start(stage);
+
+        assertNull(application.getApplicationController());
+        assertDoesNotThrow(application::stop);
+        stage.close();
+    });
+
+    assertEquals(invalidJson, java.nio.file.Files.readString(reservationFile));
+}
     private final class Shell implements AutoCloseable {
         final Main application = new Main(temporaryDirectory.resolve("reservations.json"));
         final Stage stage = new Stage();
