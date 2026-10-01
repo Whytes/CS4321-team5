@@ -87,6 +87,30 @@ class ReservationFileWriterTest {
                         .write(java.util.Collections.singletonList((Reservation) null)));
     }
 
+    @Test
+    void roundTripPreservesAllReservationFieldsIncludingHistoricalDate() throws IOException {
+        Path file = temporaryDirectory.resolve("round-trip.json");
+        Reservation original = new Reservation(
+                "historical-reservation",
+                "study-room-a",
+                "local-user",
+                LocalDate.of(2020, 10, 1),
+                LocalTime.of(9, 30),
+                LocalTime.of(11, 15));
+
+        new ReservationFileWriter(file).write(List.of(original));
+
+        ReservationStore loadedStore = new ReservationFileReader(file).read();
+        Reservation loaded = loadedStore.getReservation("historical-reservation");
+
+        assertEquals("historical-reservation", loaded.getReservationId());
+        assertEquals("study-room-a", loaded.getSpaceId());
+        assertEquals("local-user", loaded.getOwnerId());
+        assertEquals(LocalDate.of(2020, 10, 1), loaded.getDate());
+        assertEquals(LocalTime.of(9, 30), loaded.getStartTime());
+        assertEquals(LocalTime.of(11, 15), loaded.getEndTime());
+    }
+
     private static Reservation reservation(String reservationId) {
         return new Reservation(
                 reservationId,
