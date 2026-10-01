@@ -60,6 +60,11 @@ class ReservationFileWriterTest {
                 () -> new ReservationFileWriter(directory).write(List.of(reservation("reservation-1"))));
 
         assertTrue(failure.getMessage() != null && !failure.getMessage().isBlank());
+        assertTrue(Files.isDirectory(directory));
+        try (var files = Files.list(temporaryDirectory)) {
+            assertTrue(files.noneMatch(path -> path.getFileName().toString()
+                    .startsWith("not-a-file.")));
+        }
     }
 
     @Test
