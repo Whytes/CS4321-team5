@@ -337,8 +337,100 @@ Path temporaryDirectory;
         });
     }
 
+    // US-10 AT1: A created reservation survives closing and reopening
+    // the application with a fresh application/controller state.
+    @Test 
+    void createdReservationSurvivesApplicationRestart() throws Exception {
+        onFx(() -> {
+            Path reservationFile = temporaryDirectory.resolve("created-reservations.json");
+
+            Main firstApplication = new Main(reservationFile);
+            Stage firstStage = new Stage();
+            firstApplication.start(firstStage);
+
+            LocalDate reservationDate = LocalDate.now().plusDays(2); 
+
+            var result = firstApplication.getApplicationController()
+                    .getReservationController()
+                    .createReservation(
+                            "study-room-a",
+                            reservationDate,
+                            java.time.LocalTime.of(10, 0),
+                            java.time.LocalTime.of(11, 0));
+
+            assertTrue(result.isSuccess());
+
+            String reservationId = result.getReservation().getReservationId();
+
+            assertDoesNotThrow(firstApplication::stop);
+            firstStage.close();
+
+            Main reopenedApplication = new Main(reservationFile);
+            Stage reopenedStage = new Stage();
+            reopenedApplication.start(reopenedStage);
+
+            Reservation loaded = reopenedApplication.getApplicationController()
+                    .getReservationStore()
+                    .getReservation(reservationId);
+
+            assertNotNull(loaded);
+            assertEquals("study-room-a", loaded.getSpaceId());
+            assertEquals("local-user", loaded.getOwnerId());
+            assertEquals(reservationDate, loaded.getDate());
+            assertEquals(java.time.LocalTime.of(10, 0), loaded.getStartTime());
+            assertEquals(java.time.LocalTime.of(11, 0), loaded.getEndTime());
+
+            reopenedStage.close();
+        });
+    }
+
+    // US-10 AT1: A historical reservation already stored in the data file
+    // survives reopening with a fresh application/controller state.
+    @Test 
+    void historicalReservationSurvivesApplicationRestart() throws Exception {
+        onFx(() -> {
+            Path reservationFile = temporaryDirectory.resolve("historical-reservations.json");
+
+            Main firstApplication = new Main(reservationFile);
+            Stage firstStage = new Stage();
+            firstApplication.start(firstStage);
+
+            Reservation historical = new Reservation(
+                    "historical-booking",
+                    "study-room-a",
+                    "local-user",
+                    LocalDate.of(2020, 10, 1),
+                    java.time.LocalTime.of(9, 30),
+                    java.time.LocalTime.of(11, 15));
+
+            firstApplication.getApplicationController()
+                    .getReservationStore()
+                    .add(historical);
+
+            assertDoesNotThrow(firstApplication::stop);
+            firstStage.close();
+
+            Main reopenedApplication = new Main(reservationFile);
+            Stage reopenedStage = new Stage();
+            reopenedApplication.start(reopenedStage);
+
+            Reservation loaded = reopenedApplication.getApplicationController()
+                    .getReservationStore()
+                    .getReservation("historical-booking");
+
+            assertNotNull(loaded);
+            assertEquals("study-room-a", loaded.getSpaceId());
+            assertEquals("local-user", loaded.getOwnerId());
+            assertEquals(LocalDate.of(2020, 10, 1), loaded.getDate());
+            assertEquals(java.time.LocalTime.of(9, 30), loaded.getStartTime());
+            assertEquals(java.time.LocalTime.of(11, 15), loaded.getEndTime());
+
+            reopenedStage.close();
+        });
+    }
+
     @Test
-void latestReservationSnapshotSurvivesApplicationRestart() throws Exception {
+    void latestReservationSnapshotSurvivesApplicationRestart() throws Exception {
     onFx(() -> {
         Path reservationFile = temporaryDirectory.resolve("reservations.json");
 
