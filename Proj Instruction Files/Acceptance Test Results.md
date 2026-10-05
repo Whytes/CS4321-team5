@@ -35,7 +35,7 @@ The functional checks were executed through the JavaFX integration harness, whic
 | US-8 AT3 | Existing reservation | Edit with end before start. | Validation error; original reservation remains. | `End time must be after start time`; original reservation remained. | PASS |
 | US-8 AT4 | Existing reservation; past target time | Edit into the past. | Explanatory rejection; original reservation remains. | `Reservation start must be in the future`; original reservation remained. | PASS |
 | US-9 AT1 | Existing local reservation | Cancel it and inspect its schedule. | Reservation is removed and time becomes available. | Cancellation removed the record and refreshed the schedule to Available. | PASS |
-| US-9 AT2 | Existing local reservation | Select Cancel reservation, then confirm. | Confirmation removes the reservation. | Confirmation dialog is wired to the cancellation handler; confirmed cancellation removed the record. | PASS |
+| US-9 AT2 | Existing local reservation | Select Cancel reservation, then confirm. | Confirmation removes the reservation. | Automated shell test invoked the cancellation handler directly, verifying removal and refresh but not the confirmation dialog. Confirmation interaction remains unverified. | PENDING |
 | US-10 AT1 | Create a reservation, close, and reopen the application | Inspect reservations after restart. | All saved reservations are restored. | Reservation file was written on save/stop and the reopened application restored the reservation. | PASS |
 | US-10 AT2 | No reservations; close and reopen | Inspect reservations after restart. | No reservations remain. | Empty snapshot remained empty after close and reopen. | PASS |
 
