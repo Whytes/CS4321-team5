@@ -18,6 +18,18 @@ The required video agenda script, full manual checklist, and individual submissi
 - Apache Maven 3.9.16
 - Internet connection for Maven dependency downloads
 
+## Run the Program
+
+1. Install JDK 25 and Apache Maven 3.9.16.
+2. Clone this repository and open a terminal in the project folder.
+3. Start the JavaFX application:
+
+```powershell
+mvn javafx:run
+```
+
+The first run may take longer because Maven downloads JavaFX and other project dependencies. The application stores reservations in `data/reservations.json` relative to the project folder.
+
 ## Run the Tests
 
 From the project folder:
