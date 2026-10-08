@@ -48,7 +48,7 @@ On headless Linux (no display), several tests initialize JavaFX via `Platform.st
 xvfb-run -a mvn --batch-mode test
 ```
 
-Both commands above have been verified from a clean checkout with JDK 25 and Maven 3.9.16.
+`mvn clean test` and `mvn javafx:run` have been manually verified from a clean checkout with JDK 25 and Maven 3.9.16. The `xvfb-run` command above is documented from this repository's CI configuration and has not been separately verified manually in this PR.
 
 ## MVC Overview
 
@@ -69,7 +69,7 @@ See [MVC Design](Proj%20Instruction%20Files/MVC%20Design.md) for the original pa
 - **Browse spaces:** view the predefined catalog (name, building, capacity), filter by minimum capacity, and view a selected space's details.
 - **Check availability:** pick a space and date to see existing reservations and open time blocks for that day.
 - **Create a reservation:** choose a space, date, start time, and end time; the controller rejects missing fields, invalid time ranges, past start times, and conflicts with existing reservations (adjacent times are allowed).
-- **Manage "my reservations":** view, edit, or cancel the local user's own reservations (there is no login; all reservations belong to a single fixed `local-user`).
+- **Manage "my reservations":** view, edit, or cancel the local user's own reservations (there is no login; reservations created through the application are always owned by a single fixed `local-user`). The loaded file format itself does not enforce a fixed owner — any nonblank `ownerId` can be loaded from `data/reservations.json`, but only records owned by `local-user` appear in this workflow.
 
 ## Persistence
 
@@ -77,7 +77,7 @@ See [MVC Design](Proj%20Instruction%20Files/MVC%20Design.md) for the original pa
 - **Location:** `data/reservations.json`, relative to the application's working directory.
 - **First run:** if the file or its parent directory does not exist, the application starts with an empty reservation list; the predefined space catalog itself is not stored in this file.
 - **Saving:** the full, current reservation list is saved after every successful create, update, or cancellation, and again on normal application shutdown; a failed write rolls back the mutation instead of leaving data inconsistent. Saving an empty list writes `[]`, and a cancelled last reservation is never replaced with sample data.
-- **Errors:** unreadable or malformed data produces a user-facing error rather than silently overwriting or inventing reservations.
+- **Errors:** unreadable or malformed data produces a user-facing error rather than silently overwriting or inventing reservations. The exception is an empty or whitespace-only existing file, which is treated the same as a missing file (empty reservation list), not as an error.
 
 ## Submission Notes
 
