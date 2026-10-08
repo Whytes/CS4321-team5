@@ -2,9 +2,11 @@
 
 ## Sprint 1 Demo
 
-Video link: **Pending recording and upload.**
+Video link: **Pending recording and upload.** (Recording and publishing is tracked in [#35](https://github.com/Whytes/CS4321-team5/issues/35); the final link will be inserted here once available.)
 
 A JavaFX desktop application for managing campus space reservations.
+
+**Project board:** [Sprint 1](https://github.com/users/Whytes/projects/2) tracks To Do / Doing / Done status for all issues.
 
 The Sprint 1 scope, sample spaces, reservation rules, and persistence decisions are documented in [Story Scope](Proj%20Instruction%20Files/Story%20Scope.md).
 
@@ -37,3 +39,38 @@ From the project folder:
 ```powershell
 mvn clean test
 ```
+
+This runs all unit and integration tests (169 tests as of this writing) with JUnit 5 via the Surefire plugin. There is no separate integration-test command — integration tests (for example `ReservationControllerIntegrationTest`, `ReservationShellIntegrationTest`) run together with unit tests under `mvn clean test`.
+
+Both commands above have been verified from a clean checkout with JDK 25 and Maven 3.9.16.
+
+## MVC Overview
+
+The application follows a Model-View-Controller structure under `src/main/java/`:
+
+- **`model/`** — `Space`, `Reservation`, and `ReservationStore` hold domain data and validation rules (for example, rejecting overlapping reservations, requiring `endTime` after `startTime`). The store owns the one shared, in-memory reservation collection for the application session.
+- **`controller/`** — `SpaceController`, `ReservationController`, and `ApplicationController` coordinate use cases (querying spaces, creating/updating/cancelling reservations, startup load and shutdown save). Controllers contain no JavaFX rendering and no JSON parsing.
+- **`persistence/`** — `JsonReservationRepository` reads and writes `data/reservations.json`. It is the only layer that touches the file system.
+- **`view/`** — JavaFX screens (`SpaceListView`, `SpaceDetailsView`, `AvailabilityView`, `ReservationFormView`, `MyReservationsView`) render controller results and forward user actions back to controllers. Views contain no business logic.
+
+See [MVC Design](Proj%20Instruction%20Files/MVC%20Design.md) for full package maps and contracts.
+
+### Key workflows
+
+- **Browse spaces:** view the predefined catalog (name, building, capacity), filter by minimum capacity, and view a selected space's details.
+- **Check availability:** pick a space and date to see existing reservations and open time blocks for that day.
+- **Create a reservation:** choose a space, date, start time, and end time; the controller rejects missing fields, invalid time ranges, past start times, and conflicts with existing reservations (adjacent times are allowed).
+- **Manage "my reservations":** view, edit, or cancel the local user's own reservations (there is no login; all reservations belong to a single fixed `local-user`).
+
+## Persistence
+
+- **Format:** JSON array of reservation records.
+- **Location:** `data/reservations.json`, relative to the application's working directory.
+- **First run:** if the file or its parent directory does not exist, the application starts with an empty reservation list; the predefined space catalog itself is not stored in this file.
+- **Saving:** the full, current reservation list is saved on normal application shutdown. Saving an empty list writes `[]`, and a cancelled last reservation is never replaced with sample data.
+- **Errors:** unreadable or malformed data produces a user-facing error rather than silently overwriting or inventing reservations.
+
+## Submission Notes
+
+- Individual submission items (time logs, retrospectives) are tracked per team member and are **not** claimed complete here; see the checklist in [Acceptance-Test Demo and Submission Checklist](Proj%20Instruction%20Files/Acceptance%20Test%20Demo%20and%20Submission%20Checklist.md).
+- The demo video link above will be updated once recording and publishing ([#35](https://github.com/Whytes/CS4321-team5/issues/35)) is complete.
