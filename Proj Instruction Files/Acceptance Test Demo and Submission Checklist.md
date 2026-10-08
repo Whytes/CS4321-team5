@@ -94,8 +94,8 @@ Run all 27 acceptance tests manually against the integrated application, indepen
 - [ ] Each team member separately completes and submits their own retrospective using the provided template; submit as Word or PDF on Blazeview.
 - [ ] Do not treat closed issues #34 (time logs) or #35 (retrospectives) as evidence that any individual's submission is complete.
 - [ ] Ask the instructor which activity code to use for meetings (`O` in Team Instructions versus `M` in Development Requirements); apply the confirmed code consistently to each member's own log.
-- [ ] Follow all seven agenda sections above in the exact order and stay within the suggested topic times (14–27 minutes total).
-- [ ] Record the selected stories with their US/AT IDs, narrate throughout, show the actions and outcomes, and link the finished video at the top of the README under **Sprint 1 Demo**.
-- [ ] Verify that the instructor can access the video, especially if it is hosted on a restricted platform.
-- [ ] Test playback and confirm the recording's audio is clear and audible.
+- [x] Follow all seven agenda sections above in the exact order and stay within the suggested topic times (14–27 minutes total).
+- [x] Record the selected stories with their US/AT IDs, narrate throughout, show the actions and outcomes, and link the finished video at the top of the README under **Sprint 1 Demo**.
+- [x] Verify that the instructor can access the video, especially if it is hosted on a restricted platform. (Video is unlisted on YouTube; anyone with the link, including the instructor, can view it. The link is published at the top of the README.)
+- [x] Test playback and confirm the recording's audio is clear and audible.
 - [ ] Retain the completed full manual checklist and its test revision/environment/evidence as system-testing records.
