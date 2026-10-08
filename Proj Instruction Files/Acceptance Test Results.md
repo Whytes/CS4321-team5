@@ -7,7 +7,7 @@ Environment: Windows; JDK 25; Maven 3.9.16; JavaFX 21.0.6; local JavaFX runtime 
 
 ## Execution notes
 
-The functional checks were executed through the JavaFX integration harness, which constructs the real `Main` shell and drives the production controls, views, controllers, and shared store. Controlled fixtures used `2026-10-01` for deterministic reservations and a fixed clock at `2026-09-30T12:00:00Z`; the live shell checks used dates relative to 2026-10-05. Empty states, reserved/free schedule styling, confirmation behavior, editing, and restart persistence were checked at the view/controller level. The complete Maven suite passed: 169 tests, 0 failures, 0 errors, 0 skipped.
+The functional checks were executed through the JavaFX integration harness, which constructs the real `Main` shell and drives the production controls, views, controllers, and shared store. Controlled fixtures used `2026-10-01` for deterministic reservations and a fixed clock at `2026-09-30T12:00:00Z`; the live shell checks used dates relative to 2026-10-05. Empty states, reserved/free schedule styling, confirmation behavior, editing, and restart persistence were checked at the view/controller level. The complete Maven suite passed: 170 tests, 0 failures, 0 errors, 0 skipped.
 
 | ID | Setup data | Steps | Expected result | Actual result | Result |
 |---|---|---|---|---|---|
@@ -35,7 +35,7 @@ The functional checks were executed through the JavaFX integration harness, whic
 | US-8 AT3 | Existing reservation | Edit with end before start. | Validation error; original reservation remains. | `End time must be after start time`; original reservation remained. | PASS |
 | US-8 AT4 | Existing reservation; past target time | Edit into the past. | Explanatory rejection; original reservation remains. | `Reservation start must be in the future`; original reservation remained. | PASS |
 | US-9 AT1 | Existing local reservation | Cancel it and inspect its schedule. | Reservation is removed and time becomes available. | Cancellation removed the record and refreshed the schedule to Available. | PASS |
-| US-9 AT2 | Existing local reservation | Select Cancel reservation, then confirm. | Confirmation removes the reservation. | Automated shell test invoked the cancellation handler directly, verifying removal and refresh but not the confirmation dialog. Confirmation interaction remains unverified. | PENDING |
+| US-9 AT2 | Existing local reservation | Select Cancel reservation, then confirm. | Confirmation removes the reservation. | JavaFX integration test opened the confirmation dialog, clicked OK, and verified that the selected reservation was passed to the cancellation handler. | PASS |
 | US-10 AT1 | Create a reservation, close, and reopen the application | Inspect reservations after restart. | All saved reservations are restored. | Reservation file was written on save/stop and the reopened application restored the reservation. | PASS |
 | US-10 AT2 | No reservations; close and reopen | Inspect reservations after restart. | No reservations remain. | Empty snapshot remained empty after close and reopen. | PASS |
 

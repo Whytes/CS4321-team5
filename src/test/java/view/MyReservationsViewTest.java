@@ -10,10 +10,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.List;
 import controller.ReservationController;
 import controller.SpaceController;
+import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.stage.Window;
 import model.Reservation;
 import model.ReservationStore;
 import org.junit.jupiter.api.BeforeAll;
@@ -126,6 +131,47 @@ class MyReservationsViewTest {
             view.getEditButton().fire();
 
             assertSame(booking, editedReservation.get());
+        });
+    }
+
+    @Test
+    void confirmedCancellationPassesSelectedReservationToHandler() throws Exception {
+        onFx(() -> {
+            ReservationStore store = new ReservationStore();
+            ReservationController reservationController = new ReservationController(store);
+            SpaceController spaceController =
+                    new SpaceController(InitialSpaceCatalog.getDefaultSpaces());
+            AtomicReference<Reservation> cancelledReservation = new AtomicReference<>();
+            MyReservationsView view = new MyReservationsView(
+                    reservationController,
+                    spaceController,
+                    reservation -> {
+                    },
+                    cancelledReservation::set);
+            new Scene(view, 700, 400);
+
+            Reservation booking =
+                    reservation("booking", "study-room-a", "local-user", 10);
+            store.add(booking);
+            view.refreshAfterReservationChange();
+            view.applyCss();
+            view.layout();
+            ListView<?> list =
+                    (ListView<?>) view.lookup("#my-reservations-list");
+            list.getSelectionModel().selectFirst();
+
+            Platform.runLater(() -> Window.getWindows().stream()
+                    .filter(window -> window.getScene() != null)
+                    .map(window -> window.getScene().getRoot())
+                    .filter(DialogPane.class::isInstance)
+                    .map(DialogPane.class::cast)
+                    .findFirst()
+                    .ifPresent(dialogPane ->
+                            ((Button) dialogPane.lookupButton(ButtonType.OK)).fire()));
+
+            view.getCancelButton().fire();
+
+            assertSame(booking, cancelledReservation.get());
         });
     }
 
