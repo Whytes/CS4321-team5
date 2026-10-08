@@ -2,7 +2,7 @@
 
 ## Sprint 1 Demo
 
-Video link: **Pending recording and upload.** (Recording and publishing is tracked in [#33](https://github.com/Whytes/CS4321-team5/issues/33); the final link will be inserted here once available.)
+Video link: **[Watch the Sprint 1 demo](https://www.youtube.com/watch?v=eWql-kVeOTM)** (published under [#33](https://github.com/Whytes/CS4321-team5/issues/33)).
 
 A JavaFX desktop application for managing campus space reservations.
 
@@ -81,4 +81,4 @@ See [MVC Design](Proj%20Instruction%20Files/MVC%20Design.md) for the original pa
 ## Submission Notes
 
 - Individual submission items (time logs, retrospectives) are tracked per team member and are **not** claimed complete here; see the checklist in [Acceptance-Test Demo and Submission Checklist](Proj%20Instruction%20Files/Acceptance%20Test%20Demo%20and%20Submission%20Checklist.md).
-- The demo video link above will be updated once recording and publishing ([#33](https://github.com/Whytes/CS4321-team5/issues/33)) is complete.
+- The demo video has been recorded and published under [#33](https://github.com/Whytes/CS4321-team5/issues/33); the link is at the top of this README.
